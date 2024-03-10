@@ -1,13 +1,3 @@
-# Database Lab (IT3290E) Final Project - ICT K66 - HUST
-
-# Hotel Booking Website 
-As the demand for tourism is growing, the need to find hotels with high quality rooms and good services is significantly increasing. Therefore, we made this website for the purpose of providing customers with accurate information about rooms at hotel and how to book online to help you to setup hotel booking system quickly, pleasantly and easily.
-
-## Overview
-
-### Database Schema
-![Architecture](https://github.com/lcinhust/HotelBookingWebsite/blob/main/bookingapp_query/bookingapp.jpg)
-
 ### Technical Specifications
 * Frontend: EJS, CSS, Javascript
 * Backend: ExpressJS
@@ -60,27 +50,3 @@ As the demand for tourism is growing, the need to find hotels with high quality 
     └── package.json
 
 ## Collaborators
-<table>
-    <tbody>
-        <tr>
-            <th align="center">Member name</th>
-            <th align="center">Student ID</th>
-        </tr>
-        <tr>
-            <td>Nguyễn Chí Long</td>
-            <td align="center"> 20210553&nbsp;&nbsp;&nbsp;</td>
-        </tr>
-        <tr>
-            <td>Ngô Xuân Bách</td>
-            <td align="center"> 20215181&nbsp;&nbsp;&nbsp;</td>
-        </tr>
-        <tr>
-            <td>Lê Xuân Hiếu</td>
-            <td align="center"> 20215201&nbsp;&nbsp;&nbsp;</td>
-        </tr>
-        <tr>
-            <td>Đinh Việt Quang</td>
-            <td align="center"> 20215235&nbsp;&nbsp;&nbsp;</td>
-        </tr>
-    </tbody>
-</table>
