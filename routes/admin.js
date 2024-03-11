@@ -171,7 +171,11 @@ router.post('/admin/search', isLoggedInAdmin, async (req, res) => {
     res.render('reservation.ejs', { userReservation, message: req.flash('error') });
 })
 
-
+//trang
+router.get('/admin/chat', isLoggedInAdmin, (req, res) => {
+    let userReservation;
+    res.render('adminChat.ejs', { userReservation, message: req.flash('error') })
+})
 // router.get('/admin/editReservation/:id',isLoggedInAdmin, async (req, res) => {
 //     const {id} = req.params;
 //     console.log(id);
