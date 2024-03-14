@@ -291,4 +291,13 @@ router.get('/admin/decline/:id', isLoggedInAdmin, (req, res) => {
 
 })
 
+router.get('/admin/rooms', isLoggedInAdmin, (req, res) => {
+    db.query('select * from room', (err, room) => {
+        console.log(room);
+        if (err) throw err;
+        else {
+            res.render('adminRoom.ejs', {room ,message: req.flash('error') });
+        }
+    })
+})
 module.exports = router;
