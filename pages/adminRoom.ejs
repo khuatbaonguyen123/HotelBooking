@@ -16,7 +16,7 @@
 			<ul class="nav-list">
 				<li class="nav-item"><a href="/admin/dashboard" class="nav-link">Waiting List</a></li>
 				<li class="nav-item"><a href="/admin/reservation" class="nav-link">Reservation</a></li>
-				<li class="nav-item"><a href="/admin/rooms" class="nav-link">Rooms</a></li>
+                <li class="nav-item"><a href="/admin/rooms" class="nav-link">Rooms</a></li>
 			</ul>
 			<ul class="nav-list">
 				<li class="nav-item"><a href="/admin/logout" class="nav-link book-btn">Logout</a></li>
@@ -26,7 +26,7 @@
 	</div>
 	<section id="info" class="info">
 		<div class="container">
-			<h2>WAITING LIST</h2>
+			<h2>ROOM LIST</h2>
 		</div>
 	</section>
 	<!-- Tab content with title -->
@@ -36,52 +36,36 @@
 			<thead>
 				<tr> <!-- display column name -->
 					<th>ID</th>
-					<th>Booker id</th>
-					<th>Booker Name</th>
-					<th>Phone Number</th>
-					<th>Date in</th>
-					<th>Date out</th>
-					<th>Description</th>
-					<th>Decline</th>
-					<th>Accept</th>
+					<th>Room Number</th>
+					<th>Type</th>
+					<th>Delete</th>
+					<th>Edit</th>
 				</tr>
 			</thead>
 			<tbody>
 
-					<% userReservation.forEach(element=>{ %>
+					<% room.forEach(element=>{ %>
 						<tr>
 							<td data-label="ID" style="font-size: 17px; color: aliceblue;">
 								<%= element.id %>
 							</td> <!--insert into row values -->
-							<td data-label="Booker_id" style="font-size: 17px; color: aliceblue;">
-								<%= element.booker_id %>
+							<td data-label="Room Number" style="font-size: 17px; color: aliceblue;">
+								<%= element.number %>
 							</td>
-							<td data-label="Booker Name" style="font-size: 17px; color: aliceblue;">
-								<%= element.name %>
+							<td data-label="Type" style="font-size: 17px; color: aliceblue;">
+								<%= element.type_name %>
 							</td>
-							<td data-label="Phone Number" style="font-size: 17px; color: aliceblue;">
-								<%= element.phone %>
-							</td>
-							<td data-label="Date_in" style="font-size: 17px; color: aliceblue;">
-								<%= element.date_in %>
-							</td>
-							<td data-label="Date_out" style="font-size: 17px; color: aliceblue;">
-								<%= element.date_out %>
-							</td>
-							<td data-label="Description" style="font-size: 17px; color: aliceblue;">
-								<%= element.description %>
-							</td>
-							<td>
-							<form method="POST" action="/admin/decline/<%= element.id %>">
-								<button class="decline-btn">
-									Decline
+                        <td>
+							<form method="POST" action="/admin/deleteRoom/<%= element.id %>">
+								<button class="delete-btn">
+									Delete
 								</button>
 							</form>
 						</td>
 						<td>
-							<form method="POST" action="/admin/accept/<%= element.id %>">
-								<button class="accept-btn">
-									Accept
+							<form method="POST" action="/admin/editRoom/<%= element.id %>">
+								<button class="edit-btn">
+									Edit
 								</button>
 							</form>
 						</td>
