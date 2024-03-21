@@ -17,6 +17,7 @@
 				<li class="nav-item"><a href="/admin/dashboard" class="nav-link">Waiting List</a></li>
 				<li class="nav-item"><a href="/admin/reservation" class="nav-link">Reservation</a></li>
 				<li class="nav-item"><a href="/admin/chat" class="nav-link">Chat</a></li>
+                <li class="nav-item"><a href="/admin/rooms" class="nav-link">Rooms</a></li>
 			</ul>
 			<ul class="nav-list">
 				<li class="nav-item"><a href="/admin/logout" class="nav-link book-btn">Logout</a></li>
@@ -44,9 +45,22 @@
         <p>phone: <%=userReservation.phone %></p>
     </div>
     <% } %>
+    <% if (chatHistory && chatHistory.length > 0) { %>
+        <div class="chat-history-box">
+            <div class="chat-history" style=" height: 300px; overflow-y: auto;">
+                <% chatHistory.forEach(message => { %>
+                    <p style="color: blue;"><%= message.content %></p>
+                <% }); %>
+            </div>
+        </div>
+    <% } else { %>
+        <p>No chat history available.</p>
+    <% } %>
+
     <script src="tab.js"></script>
     
-    <div id="chat-container">
+    
+    <div id="chat-container"> 
         <div id="chat-box">
           </div>
         <form  action="/messages" method="post">
