@@ -168,7 +168,7 @@ router.post('/admin/search', isLoggedInAdmin, async (req, res) => {
             req.flash('error', 'ID not found');
         }
     }
-    res.render('reservation.ejs', { userReservation, message: req.flash('error') });
+    res.render('adminReservation.ejs', { userReservation, message: req.flash('error') });
 })
 
 
@@ -323,8 +323,21 @@ router.post('/admin/deleteRoom/:id', isLoggedInAdmin, (req, res) => {
     })
 })
 
-router.post('/admin/editRoom/:id', isLoggedInAdmin, (req, res) => {
-    const {id} = req.params;
-    res.redirect('/admin/rooms');
+router.post('/admin/editRoom', isLoggedInAdmin, (req, res) => {
+    const {id}=req.query;
+    console.log(id);
+    db.query(`select *
+            from facilities f
+            where f.room_id=${id}`,(err,data)=>{
+            if (err){
+                throw err;
+            }
+            console.log(data);
+            if (data){    //user exists in database
+                res.render('adminEditRoom.ejs',{data, message: req.flash('error')});
+            }
+            else res.redirect('/admin/rooms');
+        }
+    )
 })
 module.exports = router;
