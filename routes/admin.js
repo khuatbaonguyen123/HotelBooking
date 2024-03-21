@@ -133,13 +133,15 @@ router.get('/admin/reservation', isLoggedInAdmin, (req, res) => {
 //chat
 router.get('/admin/chat', isLoggedInAdmin, (req, res) => {
     let userReservation;
-    res.render('adminChat.ejs', { userReservation, message: req.flash('error') })
+    let chatHistory;
+    res.render('adminChat.ejs', { userReservation,chatHistory, message: req.flash('error') })
 })
 
 router.post('/admin/chat', isLoggedInAdmin, async (req, res) => {
     const { search } = req.body;
     let userReservation;
     let record;
+    let chatHistory;
 
     if (!isNaN(search) && search) {
         try {
@@ -159,26 +161,23 @@ router.post('/admin/chat', isLoggedInAdmin, async (req, res) => {
                 booker_id: record[0].booker_id,
                 name: record[0].name,
                 phone: record[0].phone,
-                description: [] // Initialize description array
+                
             };
 
-            // Assuming you want to push `number` from each element of `record` into `userReservation.description`
-            record.forEach(element => {
-                userReservation.description.push(element.number);
-            });
+            chatHistory = await Message.find({ idUser: search });
         } else {
             req.flash('error', 'ID not found');
         }
     }
 
-    res.render('adminChat.ejs', { userReservation, message: req.flash('error') });
+    res.render('adminChat.ejs', { userReservation,chatHistory, message: req.flash('error') });
 });
 
 router.post('/messages', isLoggedInAdmin, async (req, res) => {
-    const { idUser, content } = req.body; // Changed search1 and search2 to idUser
+    const { idUser, content } = req.body; 
 
     const newMessage = new Message({
-        idUser: idUser, // Assigned idUser once
+        idUser: idUser, 
         content: content, 
     });
 
