@@ -128,7 +128,7 @@ router.post('/admin/decline/:id', isLoggedInAdmin, (req, res) => {
 
 router.get('/admin/reservation', isLoggedInAdmin, (req, res) => {
     let userReservation;
-    res.render('reservation.ejs', { userReservation, message: req.flash('error') })
+    res.render('adminReservation.ejs', { userReservation, message: req.flash('error') })
 })
 //chat
 router.get('/admin/chat', isLoggedInAdmin, (req, res) => {
@@ -232,7 +232,7 @@ router.post('/admin/search', isLoggedInAdmin, async (req, res) => {
             req.flash('error', 'ID not found');
         }
     }
-    res.render('reservation.ejs', { userReservation, message: req.flash('error') });
+    res.render('adminReservation.ejs', { userReservation, message: req.flash('error') });
 })
 
 
@@ -306,4 +306,53 @@ router.get('/admin/decline/:id', isLoggedInAdmin, (req, res) => {
 
 })
 
+router.get('/admin/rooms', isLoggedInAdmin, (req, res) => {
+    db.query('select r.id, r.number, t.name as type_name from room r join type t on r.type_id = t.id ', (err, room) => {
+        if (err) throw err;
+        else {
+            //console.log(room);
+            res.render('adminRoom.ejs', {room ,message: req.flash('error') });
+        }
+    })
+})
+
+router.post('/admin/deleteRoom/:id', isLoggedInAdmin, (req, res) => {
+    const {id} = req.params;
+    db.query(`select r.status from reservation r join room_reserved rv on rv.reservation_id = r.id where rv.room_id = '${id}'`, (error, result) => {
+        console.log(result[0].status);
+        let status = result[0].status;
+        if (error) throw error;
+        else if(status == "accept" || status == "checkin" || status == "pending") {
+            res.redirect('/admin/rooms');
+        }
+        else {
+            console.log(result.status);
+            db.query(`delete from room where id = '${id}'`, (err, room) => {
+                if (err) throw err;
+                else {
+                    console.log(room);
+                    res.redirect('/admin/rooms');
+                }
+            })
+        }
+    })
+})
+
+router.post('/admin/editRoom', isLoggedInAdmin, (req, res) => {
+    const {id}=req.query;
+    console.log(id);
+    db.query(`select *
+            from facilities f
+            where f.room_id=${id}`,(err,data)=>{
+            if (err){
+                throw err;
+            }
+            console.log(data);
+            if (data){    //user exists in database
+                res.render('adminEditRoom.ejs',{data, message: req.flash('error')});
+            }
+            else res.redirect('/admin/rooms');
+        }
+    )
+})
 module.exports = router;
