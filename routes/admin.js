@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
+const Message = require('../dbmongo');
+
+
 
 function dateFormatting(dateType) {
 
@@ -127,7 +130,68 @@ router.get('/admin/reservation', isLoggedInAdmin, (req, res) => {
     let userReservation;
     res.render('adminReservation.ejs', { userReservation, message: req.flash('error') })
 })
+//chat
+router.get('/admin/chat', isLoggedInAdmin, (req, res) => {
+    let userReservation;
+    res.render('adminChat.ejs', { userReservation, message: req.flash('error') })
+})
 
+router.post('/admin/chat', isLoggedInAdmin, async (req, res) => {
+    const { search } = req.body;
+    let userReservation;
+    let record;
+
+    if (!isNaN(search) && search) {
+        try {
+            record = await new Promise((resolve, reject) => {
+                db.query(`select * from vReservation where id = ${search};`, (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(results);
+                });
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    
+        if (record.length > 0) {
+            userReservation = {
+                id: record[0].id,
+                booker_id: record[0].booker_id,
+                name: record[0].name,
+                phone: record[0].phone,
+                description: [] // Initialize description array
+            };
+
+            // Assuming you want to push `number` from each element of `record` into `userReservation.description`
+            record.forEach(element => {
+                userReservation.description.push(element.number);
+            });
+        } else {
+            req.flash('error', 'ID not found');
+        }
+    }
+
+    res.render('adminChat.ejs', { userReservation, message: req.flash('error') });
+});
+
+router.post('/messages', isLoggedInAdmin, async (req, res) => {
+    const { idUser, content } = req.body; // Changed search1 and search2 to idUser
+
+    const newMessage = new Message({
+        idUser: idUser, // Assigned idUser once
+        content: content, 
+    });
+
+    try {
+        await newMessage.save();
+    } catch (error) {
+        console.error('Error saving message:', error);
+        req.flash('error', 'Error saving message');
+    }
+    res.redirect('/admin/chat');
+});
+
+//chat
 router.post('/admin/search', isLoggedInAdmin, async (req, res) => {
     const { search } = req.body;
     let record;
@@ -171,41 +235,6 @@ router.post('/admin/search', isLoggedInAdmin, async (req, res) => {
     res.render('adminReservation.ejs', { userReservation, message: req.flash('error') });
 })
 
-
-// router.get('/admin/editReservation/:id',isLoggedInAdmin, async (req, res) => {
-//     const {id} = req.params;
-//     console.log(id);
-//     let record;
-//     let userReservation;
-//     if (id) {
-//         try {
-//             record = await new Promise((resolve, reject) => {
-//                 db.query(`select re.id,b.id as booker_id,concat(b.first_name,' ',b.last_name) as name,b.phone,re.date_in,re.date_out,re.description,re.status,total_price,payment_date 
-//                 from reservation as re, booker as b,payment as p
-//                 where b.id = re.booker_id and re.id=p.reservation_id and re.id = '${id}'`, (err, results) => {
-//                     if (err) reject(new Error(err.message));
-//                     resolve(results);
-//                 });
-//             });
-//         } catch (error) {
-//             req.flash('error', 'ID not found');
-//         }
-//         if (record.length > 0) {
-//             userReservation = {
-//                 id: record[0].id,              
-//                 phone: record[0].phone,
-//                 date_in: dateFormatting2(record[0].date_in),
-//                 date_out: dateFormatting2(record[0].date_out),
-//                 status:record[0].status,
-//                 description: record[0].description
-//             };
-//             // console.log(userReservation);
-//         } else {
-//             req.flash('error', 'ID not found');
-//         }
-//     }
-//     res.render('admin_editReservation.ejs', { userReservation, message: req.flash('error') });
-// })
 
 router.get('/admin/checkin/:id', isLoggedInAdmin, async (req, res) => {
     const { id } = req.params;
@@ -255,21 +284,7 @@ router.get('/admin/checkout/:id', isLoggedInAdmin, async (req, res) => {
 
 })
 
-// router.post('/admin/editReservation/:id',isLoggedInAdmin,async (req,res)=>{
-//     const {id} = req.params;
-//     const {din,dout,status} = req.body;
-//     let record;
-//     try {
-//         await new Promise((resolve, reject) => {
-//             db.query(`update reservation set date_in = '${din}', date_out = '${dout}',status = '${status}'`, (err, results) => {
-//                 if (err) reject(new Error(err.message));
-//                 resolve(results);
-//             });
-//         });
-//     } catch (error) {
-//         console.log(error);
-//     }
-// })
+
 
 router.get('/admin/decline/:id', isLoggedInAdmin, (req, res) => {
     const { id } = req.params;

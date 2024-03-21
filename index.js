@@ -4,14 +4,20 @@ require('dotenv').config();
 const session=require('express-session');
 const flash=require('connect-flash');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const Message = require('./dbmongo');
 const usersRouter = require('./routes/users');
 const generalRouter = require('./routes/general');
 const bookingRouter = require('./routes/booking');
 const adminRouter = require('./routes/admin');
 
 
-
 const app = express();
+
+mongoose.connect('mongodb://127.0.0.1:27017/chat', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(session({
@@ -38,6 +44,7 @@ app.use(generalRouter);
 app.use(usersRouter);
 app.use(bookingRouter);
 app.use(adminRouter);
+
 
 
 
