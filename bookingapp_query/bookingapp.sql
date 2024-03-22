@@ -66,6 +66,16 @@ CREATE TABLE payment (
   total_price int,
   CONSTRAINT FK_payment_reservation_id FOREIGN KEY (reservation_id) references reservation(id)
 );
+-- facilities table
+CREATE TABLE IF NOT EXISTS bookingapp.`facilities` (
+  room_id INT NOT NULL PRIMARY KEY,
+  desciption VARCHAR(100) NOT NULL,
+  CONSTRAINT room_id_fk
+    FOREIGN KEY (room_id)
+    REFERENCES room(id))
+ENGINE = InnoDB
+AUTO_INCREMENT = 249
+DEFAULT CHARACTER SET = utf8mb4;
 
 -- INDEXS
 
