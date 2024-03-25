@@ -35,7 +35,9 @@ router.get('/restaurant', (req, res) => {
 router.get('/spa', (req, res) => {
     res.render('spa.ejs');
 })
-
+router.get('/detail1', (req, res) => {
+    res.render('detail1.ejs');
+})
 
 
 

@@ -10,6 +10,12 @@ CREATE TABLE account (
   type_of_account ENUM ('booker', 'admin') default 'booker' -- the admin account is only can be created in the sql server;
 );
 
+CREATE TABLE rating (
+  id_rating int AUTO_INCREMENT,
+  rating int,
+  PRIMARY KEY (id_rating)
+);
+
 CREATE TABLE type (
   id int PRIMARY KEY auto_increment,
   name varchar(255),
