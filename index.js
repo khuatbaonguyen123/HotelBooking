@@ -12,6 +12,13 @@ const bookingRouter = require('./routes/booking');
 const adminRouter = require('./routes/admin');
 const ratingRouter = require('./routes/rating');
 
+const ratingRouter2 = require('./routes/rating2');
+const ratingRouter3 = require('./routes/rating3');
+const ratingRouter4 = require('./routes/rating4');
+const ratingRouter5 = require('./routes/rating5');
+const ratingRouter6 = require('./routes/rating6');
+
+
 const app = express();
 
 mongoose.connect('mongodb://127.0.0.1:27017/chat', {
@@ -46,7 +53,11 @@ app.use(bookingRouter);
 app.use(adminRouter);
 app.use(ratingRouter);
 
-
+app.use(ratingRouter2);
+app.use(ratingRouter3);
+app.use(ratingRouter4);
+app.use(ratingRouter5);
+app.use(ratingRouter6);
 
 
 app.listen(process.env.PORT, () => {
