@@ -152,7 +152,7 @@ router.post('/admin/chat', isLoggedInAdmin, async (req, res) => {
                 });
             });
         } catch (error) {
-            console.log(error);
+            console.log(`chat error` + error);
         }
     
         if (record.length > 0) {
@@ -189,6 +189,7 @@ router.post('/messages', isLoggedInAdmin, async (req, res) => {
     }
     res.redirect('/admin/chat');
 });
+
 
 //chat
 router.post('/admin/search', isLoggedInAdmin, async (req, res) => {
