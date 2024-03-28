@@ -679,3 +679,32 @@ input[type=submit] {
   .edit-btn:hover {
     background-color: #3e8e41;
   }
+  .row-2 {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: 8rem auto 5rem;
+    flex-direction: row !important;
+}
+
+.addForm{
+
+width: auto;
+height: auto;
+margin: auto;
+}
+
+#object1{
+
+width: 500px;
+
+float: left;
+    
+}
+
+#object2{
+
+width: 300px;
+
+float: right;
+    
+}

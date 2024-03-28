@@ -35,7 +35,24 @@ router.get('/restaurant', (req, res) => {
 router.get('/spa', (req, res) => {
     res.render('spa.ejs');
 })
-
+router.get('/detail1', (req, res) => {
+    res.render('detail1.ejs');
+})
+router.get('/detail2', (req, res) => {
+    res.render('detail2.ejs');
+})
+router.get('/detail3', (req, res) => {
+    res.render('detail3.ejs');
+})
+router.get('/detail4', (req, res) => {
+    res.render('detail4.ejs');
+})
+router.get('/detail5', (req, res) => {
+    res.render('detail5.ejs');
+})
+router.get('/detail6', (req, res) => {
+    res.render('detail6.ejs');
+})
 
 
 

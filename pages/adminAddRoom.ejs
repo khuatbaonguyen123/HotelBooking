@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Admin</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+	<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+	<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+	<div class="container">
+		<nav class="navbar">
+			<a class="logo" href="/index">Hong Phuong</a>
+			<ul class="nav-list">
+				<li class="nav-item"><a href="/admin/dashboard" class="nav-link">Waiting List</a></li>
+				<li class="nav-item"><a href="/admin/reservation" class="nav-link">Reservation</a></li>
+				<li class="nav-item"><a href="/admin/chat" class="nav-link">Chat</a></li>
+				<li class="nav-item"><a href="/admin/rooms" class="nav-link">Rooms</a></li>
+			</ul>
+			<ul class="nav-list">
+				<li class="nav-item"><a href="/admin/logout" class="nav-link book-btn">Logout</a></li>
+			</ul>
+		</nav>
+		</nav>
+	</div>
+    <section class="editRoom">
+        <div class="container" style="justify-content: center;">
+			<h3>New Room</h3>
+		</div>
+		<div class= "addForm" style="justify-content: center; margin: 30px 100px 0px 100px">
+			<form idmethod="POST" action="/admin/addRoom">
+				<textarea name="number" placeholder="Room number" id="object1" required></textarea>
+                <select style="width: 15%;" id="object2">
+                    <option>Single</option>
+                    <option>Double</option>
+                    <option>Triple</option>
+                    <option>Quad</option>
+                    <option>President</option>
+                    <option>Rooftop</option>
+                </select>
+                <textarea name="facility" placeholder="Facility" required></textarea>
+				<textarea name="description" placeholder="Description" required></textarea>
+				<!-- Save changes button-->
+				<a><button class="btn btn-primary">Save changes</button></a>
+			</form>
+		</div>
+    </section>
+	<script src="tab.js"></script>
+</body>

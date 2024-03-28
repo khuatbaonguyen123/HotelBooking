@@ -355,4 +355,25 @@ router.post('/admin/editRoom', isLoggedInAdmin, (req, res) => {
         }
     )
 })
+
+async function addRoom(number, type_id) {
+    try {
+        await new Promise((resolve, reject) => {
+            db.query(`insert into room (number,type_id)
+            values
+            (?,?)`, [number,type_id], (err, results) => {
+                if (err) reject(new Error(err.message));
+                resolve();
+            });
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+router.get('/admin/addRoom', isLoggedInAdmin, (req, res) => {
+    //res.status(404).json({ message: 'Please enter all fields' });
+    let message = null;
+    res.render('adminAddRoom.ejs', message);
+})
 module.exports = router;
