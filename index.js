@@ -14,7 +14,7 @@ const adminRouter = require('./routes/admin');
 
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1:27017/chat', {
+mongoose.connect('mongodb+srv://Do_Trang:admin12345@dbms.l8swf6y.mongodb.net/?retryWrites=true&w=majority&appName=dbmst', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
