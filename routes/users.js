@@ -238,6 +238,7 @@ router.post('/editPassword',isLoggedIn, (req,res)=>{
 
 })
 
+
 router.get('/logout', isLoggedIn, (req,res)=>{
     req.session.destroy();
     res.redirect('/loginform')
@@ -246,6 +247,7 @@ router.get('/logout', isLoggedIn, (req,res)=>{
 router.get('/signupform', (req, res) => {
     res.render('signupform.ejs',{message:req.flash('error')});
 })
+
 
 
 module.exports = router;

@@ -25,9 +25,6 @@ router.get('/contact', (req, res) => {
     res.render('contact.ejs');
 })
 
-router.get('/chat', (req, res) => {
-    res.render('chat.ejs');
-})
 router.get('/restaurant', (req, res) => {
     res.render('restaurant.ejs');
 })
