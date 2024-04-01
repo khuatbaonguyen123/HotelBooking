@@ -57,97 +57,40 @@
                     <option>Sort by Spacing</option>
                 </select>
             </div>
-            <div class="row">
-                <div class="col-2">
-                    <div class="room-image">
-                        <img src="images/room-1.jpg" alt="room">
+            <% for(let i = 0; i < data.length; i++) {%>
+                <div class="row">
+                    <div class="col-2">
+                        <div class="room-image">
+                            <img src=<%= data[i].image %> alt="room">
+                        </div>
+                        <div class="room-info">
+                            <div>
+                                <h4> <%= data[i].name %> </h4>
+                                <p> <%= data[i].description%> </p>
+                                <p class="price"><span><%= data[i].price_each_day %></span> / night</p>
+                                <a href=<%= data[i].link %>>More Details</a>
+                                <% i++; %>
+                            </div>
+                        </div>
                     </div>
-                    <div class="room-info">
-                        <div>
-                            <h4>Single Room</h4>
-                            <p>A spacious sigle room which has large single bed, locates between the 4th and 13rd floor 
-                                with sweeping view overlooking the vibrant city.</p>
-                            <p class="price"><span>$100</span> / night</p>
-                            <a href="/detail1">More Details</a>
+                    <div class="col-2">
+                        <div class="room-image">
+                            <img src=<%= data[i].image %> alt="room">
+                        </div>
+                        <div class="room-info">
+                            <div>
+                                <div>
+                                    <h4> <%= data[i].name %> </h4>
+                                    <p> <%= data[i].description%> </p>
+                                    <p class="price"><span><%= data[i].price_each_day %></span> / night</p>
+                                    <a href=<%= data[i].link %>>More Details</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-2">
-                    <div class="room-image">
-                        <img src="images/room-2.jpg" alt="room">
-                    </div>
-                    <div class="room-info">
-                        <div>
-                            <h4>Double Room</h4>
-                            <p>Providing an average of 34sqm of comfortable living space, 
-                                the Luxury Double Room offers a perfect blend of classical elegance</p>
-                            <p class="price"><span>$150</span> / night</p>
-                            <a href="/detail2">More Details</a>
-                        </div>
-                    </div>
-                </div>
+                <% } %>
             </div>
-            <div class="row">
-                <div class="col-2">
-                    <div class="room-image">
-                        <img src="images/room-3.jpg" alt="room">
-                    </div>
-                    <div class="room-info">
-                        <div>
-                            <h4>Triple Room</h4>
-                            <p>Located on upper level with panoramic view of Ho Guom, 
-                                the Standard One Person Room is the perfect retreat to leave behind the hassle of daily life and experience.</p>
-                            <p class="price"><span>$200</span> / night</p>
-                            <a href="/detail3">More Details</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-2">
-                    <div class="room-image">
-                        <img src="images/room-4.jpg" alt="room">
-                    </div>
-                    <div class="room-info">
-                        <div>
-                            <h4>Quad Suite</h4>
-                            <p>Spacious in size and elegant in style, the Deluxe Quad Suite features a living room, 
-                                an airy bedroom and a comfortable working area for greater privacy.</p>
-                            <p class="price"><span>$250</span> / night</p>
-                            <a href="/detail4">More Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-2">
-                    <div class="room-image">
-                        <img src="images/room-5.jpg" alt="room">
-                    </div>
-                    <div class="room-info">
-                        <div>
-                            <h4>President Suite</h4>
-                            <p>Embodies the elegance that defines our luxury hotel, 
-                                the President Suites are beautifully decorated in elegant tones that create a distinctive atmosphere.</p>
-                            <p class="price"><span>$400</span> / night</p>
-                            <a href="/detail5">More Details</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-2">
-                    <div class="room-image">
-                        <img src="images/room-6.jpg" alt="room">
-                    </div>
-                    <div class="room-info">
-                        <div>
-                            <h4>Rooftop Suite</h4>
-                            <p>Nestled on the top floor, the Rooftop Suite provides an ingenious blend of luxury and private living, 
-                                featuring the full range of first class hotel services.</p>
-                            <p class="price"><span>$350</span> / night</p>
-                            <a href="/detail6">More Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </section>
 
     <!-- footer section -->

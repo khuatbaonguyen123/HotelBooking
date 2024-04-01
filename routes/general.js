@@ -13,7 +13,13 @@ router.get('/index', (req, res) => {
 })
 
 router.get('/rooms', (req, res) => {
-    res.render('rooms.ejs');
+    const query = "select distinct name, description, link, image, price_each_day from type t " + 
+                  "join month_price m on t.id = m.type_id;"
+    db.query(query, (err, data) => {
+        if (err) throw err;
+        else
+            res.render('rooms.ejs', {data});
+    })
 })
 
 router.get('/about', (req, res) => {
