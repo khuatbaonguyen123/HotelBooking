@@ -156,7 +156,7 @@
     });
 
     $.ajax({
-      url: "http://localhost:3001/messages",
+      url:  "http://localhost:3001/messages/search?user_id=<%= user.user_id %>",
       type: "GET",
       success: function (data) {
         data?.forEach((msg) => {
@@ -166,5 +166,6 @@
         });
       },
     });
-  </script>
+</script>
+  
 </html>

@@ -152,11 +152,16 @@
             console.log("Selected chatId:", chatId);
             document.getElementById('user_id').value = chatId;
              $.ajax({
-                url: "/admin/chat",
-                type: "POST", 
-                data: { chatId: chatId }, 
-                success: function (response) {
-                    console.log("Chat ID saved successfully:", response);
+                url: `http://localhost:3001/messages/search?user_id=${chatId}`,
+                type: "GET", 
+                success: function (data) {
+                    $(".messages-ul").empty()
+
+                    data?.forEach((msg) => {
+                        $(".messages-ul").append(
+                            `<li class="messages-li">${msg?.user_name}: ${msg?.message}</li>`
+                        );
+                    });
                 },
                 error: function (xhr, status, error) {
                     console.error("Error saving chat ID:", error);
