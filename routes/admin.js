@@ -143,20 +143,29 @@ router.get("/admin/reservation", isLoggedInAdmin, (req, res) => {
 });
 //chat
 router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
-  console.log(req.session.adminID);
-  const query = `select id,email from account where id = ${req.session.adminID};`;
-  console.log("Executing DB Query:", query); 
-  db.query(query, (err, result) => {
+  const adminQuery = `SELECT id, email FROM account WHERE id = ${req.session.adminID};`;
+  db.query(adminQuery, (err, adminResult) => {
     if (err) {
-      console.error("Error executing DB Query:", err); // Logging any errors
-      throw err; // You may handle errors according to your application's logic
+      console.error("Error fetching admin details:", err);
+      throw err;
     } else {
-      console.log(result);
-      res.render("adminChat.ejs", {
-        user: {
-          user_id: result[0].id,
-          email: result[0].email,
-        },
+      const adminData = {
+        user_id: adminResult[0].id, // Add user_id here
+        email: adminResult[0].email,
+      };
+      const userIdsQuery = "SELECT id FROM account";
+      db.query(userIdsQuery, (err, userResults) => {
+        if (err) {
+          console.error("Error fetching user IDs:", err);
+          throw err;
+        } else {
+          const userIds = userResults.map((user) => user.id);
+
+          res.render("adminChat.ejs", {
+            user: adminData,
+            userIds: userIds
+          });
+        }
       });
     }
   });

@@ -51,6 +51,7 @@
             color: #455D58;
             top: 30px;
         }
+
     </style>
 </head>
 
@@ -72,6 +73,15 @@
     </div>
     <input id="user_id" value="<%= user.user_id %>" />
     <input id="email" value="<%= user.email %>" />
+
+    <h1>User IDs</h1>
+    <ul>
+        <% userIds.forEach(userId => { %>
+            <li><a href="#" class="user-id" data-id="<%= userId %>"><%= userId %></a></li>
+        <% }); %>
+    </ul>
+
+
     <div class="box-chat">
         <div class="box-title">
             <h1>Chat</h1>
@@ -129,6 +139,30 @@
                 );
             });
         },
+    });
+</script>
+
+<script>
+    document.querySelectorAll('.user-id').forEach(link => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const selectedUserId = event.target.dataset.id;
+            const adminId = "<%= user.user_id %>";
+            const chatId = adminId + "to" + selectedUserId;
+            console.log("Selected chatId:", chatId);
+            document.getElementById('user_id').value = chatId;
+             $.ajax({
+                url: "/admin/chat",
+                type: "POST", 
+                data: { chatId: chatId }, 
+                success: function (response) {
+                    console.log("Chat ID saved successfully:", response);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error saving chat ID:", error);
+                }
+            });
+        });
     });
 </script>
 
