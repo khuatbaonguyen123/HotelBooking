@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
     idUser: String,
+    role: Number,
   content: String,
   timestamp: { type: Date, default: Date.now }
 });
