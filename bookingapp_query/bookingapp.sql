@@ -189,7 +189,68 @@ select re.id,b.id as booker_id,concat(b.first_name,' ',b.last_name) as name,b.ph
 from reservation as re, booker as b,payment as p,room_reserved as r, room
 where b.id = re.booker_id and re.id=p.reservation_id and r.reservation_id = re.id and room.id = r.room_id and re.status = 'pending';
     
+create view vroomlist as
+select room.id, room.number, room.type_id, 
+	   if(r.status is null, "available", r.status) as status, 
+       if(first_name is null, '', concat(last_name, ' ', first_name)) as booker
+from room
+left join room_reserved rr on room.id = rr.room_id
+left join reservation r on rr.reservation_id = r.id
+left join booker on r.booker_id = booker.id
 -- INSERT SOME NECESSARY FOR THE APP
+
+ALTER TABLE type
+ADD COLUMN description TEXT,
+ADD COLUMN link VARCHAR(255),
+ADD COLUMN image VARCHAR(255);
+
+UPDATE type 
+SET 
+	description = 'A spacious sigle room which has large single bed, locates between the 4th and 13rd floor 
+                                with sweeping view overlooking the vibrant city.',
+	link = '/detail1',
+    image = 'images/room-1.jpg'
+WHERE id = 1;
+
+UPDATE type 
+SET 
+	description = 'Providing an average of 34sqm of comfortable living space, 
+                                the Luxury Double Room offers a perfect blend of classical elegance',
+	link = '/detail2',
+    image = 'images/room-2.jpg'
+WHERE id = 2;
+
+UPDATE type 
+SET 
+	description = 'Located on upper level with panoramic view of Ho Guom, 
+                                the Standard One Person Room is the perfect retreat to leave behind the hassle of daily life and experience.',
+	link = '/detail3',
+    image = 'images/room-3.jpg'
+WHERE id = 3;
+
+UPDATE type 
+SET 
+	description = 'Spacious in size and elegant in style, the Deluxe Quad Suite features a living room, 
+                                an airy bedroom and a comfortable working area for greater privacy.',
+	link = '/detail4',
+    image = 'images/room-4.jpg'
+WHERE id = 4;
+
+UPDATE type 
+SET 
+	description = 'Embodies the elegance that defines our luxury hotel, 
+                                the President Suites are beautifully decorated in elegant tones that create a distinctive atmosphere.',
+	link = '/detail5',
+    image = 'images/room-5.jpg'
+WHERE id = 5;
+
+UPDATE type 
+SET 
+	description = 'Nestled on the top floor, the Rooftop Suite provides an ingenious blend of luxury and private living, 
+                                featuring the full range of first class hotel services.',
+	link = '/detail6',
+    image = 'images/room-6.jpg'
+WHERE id = 6;
 
     
 insert into type(name,capacity)

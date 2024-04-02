@@ -43,9 +43,13 @@
                 <textarea name="facility" placeholder="Facility" required></textarea>
 				<textarea name="description" placeholder="Description" required></textarea>
 				<!-- Save changes button-->
-				<a><button class="btn btn-primary">Save changes</button></a>
+				<button class="btn btn-primary" onclick="submitForm()">Add</button>
 			</form>
 		</div>
     </section>
-	<script src="tab.js"></script>
+	<script src="tab.js">
+		function submitForm() {
+			var name = document.getElementById("name").value;
+		}
+	</script>
 </body>

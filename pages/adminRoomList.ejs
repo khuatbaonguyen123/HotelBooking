@@ -37,32 +37,39 @@
 		<table>
 			<thead>
 				<tr> <!-- display column name -->
-					<th>ID</th>
-					<th>Room type</th>
 					<th>Number</th>
-					<th>Show</th>
+					<th>Status</th>
+					<th>Booker</th>
+					<th>Delete</th>
 				</tr>
 			</thead>
 			<tbody>
 
-					<% room.forEach(element=>{ %>
+					<% data.forEach(element=>{ %>
 						<tr>
-							<td data-label="ID" style="font-size: 17px; color: aliceblue;">
-								<%= element.id %>
 							</td> <!--insert into row values -->
-							<td data-label="Room type" style="font-size: 17px; color: aliceblue;">
-								<%= element.name %>
-							</td>
 							<td data-label="Number" style="font-size: 17px; color: aliceblue;">
-								<%= element.room_count %>
+								<%= element.number %>
 							</td>
-                        <td>
-							<form method="POST" action="/admin/roomlist?id=<%= element.id %>">
-								<button class="edit-btn">
-									Show
-								</button>
-							</form>
-						</td>
+							<td data-label="Status" style="font-size: 17px; color: aliceblue;">
+								<%= element.status %>
+							</td>
+                            <td data-label="Booker" style="font-size: 17px; color: aliceblue;">
+								<%= element.booker %>
+							</td>
+                            <td>
+                                <% if(element.status == 'available') { %>
+                                    <form method="POST" action="/admin/deleteRoom/<%= element.id %>">
+                                        <button class="delete-btn">
+                                            Delete
+                                        </button>
+                                    </form>
+                                <% } else { %>
+                                    <button type="button" disabled style="opacity: 0.5; background-color: #d82522; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 16px;">
+                                        Delete
+                                    </button>
+                                <% } %>
+                            </td>
 						</tr>
 						<% }) %>
 			</tbody>

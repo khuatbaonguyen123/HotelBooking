@@ -297,9 +297,10 @@ router.get("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
 });
 
 router.get("/admin/rooms", isLoggedInAdmin, (req, res) => {
-  db.query(
-    "select r.id, r.number, t.name as type_name from room r join type t on r.type_id = t.id ",
-    (err, room) => {
+  let query = "select t.id, name, count(*) as room_count from type t " 
+            + "join room r on t.id = r.type_id "
+            + "group by id;";
+  db.query(query, (err, room) => {
       if (err) throw err;
       else {
         //console.log(room);
@@ -337,27 +338,48 @@ router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
   );
 });
 
-router.post("/admin/editRoom", isLoggedInAdmin, (req, res) => {
+// router.post("/admin/editRoom", isLoggedInAdmin, (req, res) => {
+//   const { id } = req.query;
+//   console.log(id);
+//   db.query(
+//     `select *
+//             from facilities f
+//             where f.room_id=${id}`,
+//     (err, data) => {
+//       if (err) {
+//         throw err;
+//       }
+//       console.log(data);
+//       if (data) {
+//         //user exists in database
+//         res.render("adminEditRoom.ejs", { data, message: req.flash("error") });
+//       } else res.redirect("/admin/rooms");
+//     }
+//   );
+// });
+
+router.post("/admin/roomlist", isLoggedInAdmin, (req, res) => {
   const { id } = req.query;
   console.log(id);
   db.query(
-    `select *
-            from facilities f
-            where f.room_id=${id}`,
+    `select number, status, booker
+      from vroomlist
+      where type_id =${id}`,
     (err, data) => {
       if (err) {
         throw err;
       }
       console.log(data);
-      if (data) {
-        //user exists in database
-        res.render("adminEditRoom.ejs", { data, message: req.flash("error") });
-      } else res.redirect("/admin/rooms");
+      res.render("adminRoomList.ejs", { data, message: req.flash("error") });
     }
   );
 });
 
-async function addRoom(number, type_id) {
+router.get("/admin/addRoom", isLoggedInAdmin, (req, res) => {
+    res.render("adminAddRoom.ejs");
+});
+
+router.post("/admin/addRoom", isLoggedInAdmin, async (req, res) => {
   try {
     await new Promise((resolve, reject) => {
       db.query(
@@ -374,11 +396,7 @@ async function addRoom(number, type_id) {
   } catch (error) {
     console.log(error);
   }
-}
-
-router.get("/admin/addRoom", isLoggedInAdmin, (req, res) => {
-  //res.status(404).json({ message: 'Please enter all fields' });
-  let message = null;
-  res.render("adminAddRoom.ejs", message);
+  res.render("adminAddRoom.ejs");
 });
+
 module.exports = router;
