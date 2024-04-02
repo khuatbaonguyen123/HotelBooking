@@ -81,9 +81,7 @@ router.post('/signin',(req,res)=>{
                 bcrypt.compare(password,user.password, (err,isMatch)=>{
                     if (err) throw err;
                     if (isMatch){
-                        session=req.session;
-                        session.userId=user.id;
-                    
+                        req.session.userId=user.id;
                         res.redirect('/index');
                     } 
                     else {
