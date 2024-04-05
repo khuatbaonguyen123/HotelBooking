@@ -14,7 +14,8 @@ router.get('/index', (req, res) => {
 
 router.get('/rooms', (req, res) => {
     const query = "select distinct name, description, link, image, price_each_day from type t " + 
-                  "join month_price m on t.id = m.type_id;"
+                  "join month_price m on t.id = m.type_id " +
+                  "where m.month = extract(month from NOW());"
     db.query(query, (err, data) => {
         if (err) throw err;
         else
