@@ -1,22 +1,12 @@
 const mongoose = require('mongoose');
 
-const messageSchema = new mongoose.Schema({
-    idUser: String,
-    role: Number,
-  content: String,
+const ratingSchema = new mongoose.Schema({
+  rating:  { type: Number, required: true },
+  idUser: { type: Number, required: true },
+  // date_in: {type: Date, require: true},
   timestamp: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('messages', messageSchema);
+const Rating = mongoose.model('Rating', ratingSchema);
 
-//true
-// const mongoose = require('mongoose');
-
-// const messageSchema = new mongoose.Schema({
-//     senderId: String,   
-//     receiverId: String, 
-//     content: String,
-//     timestamp: { type: Date, default: Date.now }
-// });
-
-// module.exports = mongoose.model('messages', messageSchema);
+module.exports = Rating;
