@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
+<<<<<<< HEAD
 const Rating = require('../model_mongodb/dbmongo.js');
+=======
+const Rating = require('../dbmongo.js');
+>>>>>>> a95ab3ac22da80b097e3db9aad4da283271b2468
 const db = require('../database');
 let cnt = 0;
 

@@ -47,9 +47,12 @@ CREATE TABLE rating6 (
 );
 
 CREATE TABLE type (
-  id int PRIMARY KEY auto_increment,
-  name varchar(255),
-  capacity int
+	id int PRIMARY KEY auto_increment,
+	name varchar(255),
+	capacity int,
+	description TEXT,
+	link VARCHAR(255),
+	image VARCHAR(255)
 );
 
 CREATE TABLE room (
@@ -165,7 +168,7 @@ where re.id = rr.reservation_id and rr.room_id = r.id and re.id = old.id)
 where reservation_id = old.id;
 end if;
 end//
-
+DELIMITER ;
 -- this event to auto decline the reservation when pass the date_in day
 CREATE EVENT update_status_event
 ON SCHEDULE EVERY 1 DAY
@@ -197,6 +200,7 @@ from room
 left join room_reserved rr on room.id = rr.room_id
 left join reservation r on rr.reservation_id = r.id
 left join booker on r.booker_id = booker.id;
+<<<<<<< HEAD
 -- INSERT SOME NECESSARY FOR THE APP    
 insert into type(name,capacity)
 values 
@@ -259,6 +263,24 @@ SET
 	link = '/detail6',
     image = 'images/room-6.jpg'
 WHERE id = 6;
+=======
+-- INSERT SOME NECESSARY FOR THE APP
+    
+insert into type(name,capacity, description, link, image)
+values 
+('single',1,'A spacious sigle room which has large single bed, locates between the 4th and 13rd floor 
+                                with sweeping view overlooking the vibrant city.','/detail1', 'images/room-1.jpg'),
+('double',2,'Providing an average of 34sqm of comfortable living space, 
+                                the Luxury Double Room offers a perfect blend of classical elegance','/detail2','images/room-2.jpg'),
+('triple',3,'Located on upper level with panoramic view of Ho Guom, 
+                                the Standard One Person Room is the perfect retreat to leave behind the hassle of daily life and experience.','/detail3','images/room-3.jpg'),
+('quad',4,'Spacious in size and elegant in style, the Deluxe Quad Suite features a living room, 
+                                an airy bedroom and a comfortable working area for greater privacy.','/detail4','images/room-4.jpg'),
+('president',2,'Embodies the elegance that defines our luxury hotel, 
+                                the President Suites are beautifully decorated in elegant tones that create a distinctive atmosphere.','/detail5','images/room-5.jpg'),
+('rooftop',2,'Nestled on the top floor, the Rooftop Suite provides an ingenious blend of luxury and private living, 
+                                featuring the full range of first class hotel services.','/detail6','images/room-6.jpg');
+>>>>>>> a95ab3ac22da80b097e3db9aad4da283271b2468
       
 insert into room (number,type_id)
 values 
@@ -333,78 +355,78 @@ values
 
 insert into month_price(type_id,month,year,price_each_day)
 values 
-(1,1,2023,100),
-(2,1,2023,150),
-(3,1,2023,200),
-(4,1,2023,250),
-(5,1,2023,400),
-(6,1,2023,350),
-(1,2,2023,100),
-(2,2,2023,150),
-(3,2,2023,200),
-(4,2,2023,250),
-(5,2,2023,400),
-(6,2,2023,350),
-(1,3,2023,100),
-(2,3,2023,150),
-(3,3,2023,200),
-(4,3,2023,250),
-(5,3,2023,400),
-(6,3,2023,350),
-(1,4,2023,200),
-(2,4,2023,300),
-(3,4,2023,400),
-(4,4,2023,500),
-(5,4,2023,800),
-(6,4,2023,700),
-(1,5,2023,100),
-(2,5,2023,150),
-(3,5,2023,200),
-(4,5,2023,250),
-(5,5,2023,400),
-(6,5,2023,350),
-(1,6,2023,100),
-(2,6,2023,150),
-(3,6,2023,200),
-(4,6,2023,250),
-(5,6,2023,400),
-(6,6,2023,350),
-(1,7,2023,100),
-(2,7,2023,150),
-(3,7,2023,200),
-(4,7,2023,250),
-(5,7,2023,400),
-(6,7,2023,350),
-(1,8,2023,100),
-(2,8,2023,150),
-(3,8,2023,200),
-(4,8,2023,250),
-(5,8,2023,400),
-(6,8,2023,350),
-(1,9,2023,100),
-(2,9,2023,150),
-(3,9,2023,200),
-(4,9,2023,250),
-(5,9,2023,400),
-(6,9,2023,350),
-(1,10,2023,100),
-(2,10,2023,150),
-(3,10,2023,200),
-(4,10,2023,250),
-(5,10,2023,400),
-(6,10,2023,350),
-(1,11,2023,100),
-(2,11,2023,150),
-(3,11,2023,200),
-(4,11,2023,250),
-(5,11,2023,400),
-(6,11,2023,350),
-(1,12,2023,100),
-(2,12,2023,150),
-(3,12,2023,200),
-(4,12,2023,250),
-(5,12,2023,400),
-(6,12,2023,350);
+(1,1,2024,100),
+(2,1,2024,150),
+(3,1,2024,200),
+(4,1,2024,250),
+(5,1,2024,400),
+(6,1,2024,350),
+(1,2,2024,100),
+(2,2,2024,150),
+(3,2,2024,200),
+(4,2,2024,250),
+(5,2,2024,400),
+(6,2,2024,350),
+(1,3,2024,100),
+(2,3,2024,150),
+(3,3,2024,200),
+(4,3,2024,250),
+(5,3,2024,400),
+(6,3,2024,350),
+(1,4,2024,200),
+(2,4,2024,300),
+(3,4,2024,400),
+(4,4,2024,500),
+(5,4,2024,800),
+(6,4,2024,700),
+(1,5,2024,100),
+(2,5,2024,150),
+(3,5,2024,200),
+(4,5,2024,250),
+(5,5,2024,400),
+(6,5,2024,350),
+(1,6,2024,100),
+(2,6,2024,150),
+(3,6,2024,200),
+(4,6,2024,250),
+(5,6,2024,400),
+(6,6,2024,350),
+(1,7,2024,100),
+(2,7,2024,150),
+(3,7,2024,200),
+(4,7,2024,250),
+(5,7,2024,400),
+(6,7,2024,350),
+(1,8,2024,100),
+(2,8,2024,150),
+(3,8,2024,200),
+(4,8,2024,250),
+(5,8,2024,400),
+(6,8,2024,350),
+(1,9,2024,100),
+(2,9,2024,150),
+(3,9,2024,200),
+(4,9,2024,250),
+(5,9,2024,400),
+(6,9,2024,350),
+(1,10,2024,100),
+(2,10,2024,150),
+(3,10,2024,200),
+(4,10,2024,250),
+(5,10,2024,400),
+(6,10,2024,350),
+(1,11,2024,100),
+(2,11,2024,150),
+(3,11,2024,200),
+(4,11,2024,250),
+(5,11,2024,400),
+(6,11,2024,350),
+(1,12,2024,100),
+(2,12,2024,150),
+(3,12,2024,200),
+(4,12,2024,250),
+(5,12,2024,400),
+(6,12,2024,350);
 
 insert into account(email,password,type_of_account)
 values ('admin@test.com','admin','admin');

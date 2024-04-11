@@ -375,27 +375,60 @@ router.post("/admin/roomlist", isLoggedInAdmin, (req, res) => {
   );
 });
 
-router.get("/admin/addRoom", isLoggedInAdmin, (req, res) => {
-    res.render("adminAddRoom.ejs");
+async function addRoom(number, rtype) {
+  try {
+      await new Promise((resolve, reject) => {
+          db.query(`insert into room(number, type_id)
+          values
+          (?,?)`, [number, rtype], (err, results) => {
+              if (err) reject(new Error(err.message));
+              resolve();
+          });
+      });
+  } catch (error) {
+      console.log(error);
+  }
+}
+
+router.post("/admin/addRoom", async(req, res)=>{
+  console.log(req.body);
+  const {number, type} = req.body;
+  let query = "select id from type where name = '" + type.toLowerCase() + "';";
+  console.log(query);
+  let rtype = 1;
+  db.query(query, (err, data) => {
+    if (err) {
+      throw err;
+    }
+    console.log(data);
+     rtype = data[0].id;
+    console.log(rtype);
+    db.query(`SELECT * FROM room WHERE number = ${number};`, async (error, data1) => {
+      if (error) {
+        throw error;
+      }
+      console.log(data1);
+      if(data1.length > 0) {
+        console.log(data1);
+        req.flash('error', `Room ${number} already exists`);
+        res.redirect("/admin/rooms");
+      } else {
+        try {
+          addRoom(number, rtype);
+          console.log('adddddddd');
+          req.flash('error', `Successfully added ${type} room ${number}` );
+          res.redirect("/admin/rooms");
+        } catch (err) {
+          console.log(err);
+          res.status(500).send('Internal server error');
+        }
+      }
+    });
+  });
 });
 
-router.post("/admin/addRoom", isLoggedInAdmin, async (req, res) => {
-  try {
-    await new Promise((resolve, reject) => {
-      db.query(
-        `insert into room (number,type_id)
-            values
-            (?,?)`,
-        [number, type_id],
-        (err, results) => {
-          if (err) reject(new Error(err.message));
-          resolve();
-        }
-      );
-    });
-  } catch (error) {
-    console.log(error);
-  }
+router.get("/admin/addRoomForm", (req, res) => {
+  
   res.render("adminAddRoom.ejs");
 });
 
