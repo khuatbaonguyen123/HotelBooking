@@ -105,7 +105,8 @@ router.get('/profile', isLoggedIn, (req, res) => {
                 if (err) throw err;
                 const userData=results[0];
                 db.query(`select b.reservation_id,date_in,date_out,number,a.status
-                from reservation a join room_reserved b on a.id=b.reservation_id 
+                from reservation a 
+                join room_reserved b on a.id=b.reservation_id 
                 join room c on b.room_id=c.id join payment d on a.id=d.reservation_id
                 where booker_id=${req.session.userId}
                 order by reservation_id`,(err,results)=>{

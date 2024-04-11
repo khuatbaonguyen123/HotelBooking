@@ -58,5 +58,68 @@ router.get('/detail6', (req, res) => {
 })
 
 
+router.get('/Assignment_r', (req, res) => {
+    res.render('Assignment_r.ejs');
+})
+router.get('/Assignment_db', (req, res) => {
+    res.render('Assignment_db.ejs');
+})
+router.get('/Assignment_s', (req, res) => {
+    res.render('Assignment_s.ejs');
+})
 
+
+router.get('/Assignment_r2', (req, res) => {
+    res.render('Assignment_r2.ejs');
+})
+router.get('/Assignment_db2', (req, res) => {
+    res.render('Assignment_db2.ejs');
+})
+router.get('/Assignment_s2', (req, res) => {
+    res.render('Assignment_s2.ejs');
+})
+
+
+router.get('/Assignment_r3', (req, res) => {
+    res.render('Assignment_r3.ejs');
+})
+router.get('/Assignment_db3', (req, res) => {
+    res.render('Assignment_db3.ejs');
+})
+router.get('/Assignment_s3', (req, res) => {
+    res.render('Assignment_s3.ejs');
+})
+
+
+router.get('/Assignment_r4', (req, res) => {
+    res.render('Assignment_r4.ejs');
+})
+router.get('/Assignment_db4', (req, res) => {
+    res.render('Assignment_db4.ejs');
+})
+router.get('/Assignment_s4', (req, res) => {
+    res.render('Assignment_s4.ejs');
+})
+
+
+router.get('/Assignment_r5', (req, res) => {
+    res.render('Assignment_r5.ejs');
+})
+router.get('/Assignment_db5', (req, res) => {
+    res.render('Assignment_db5.ejs');
+})
+router.get('/Assignment_s5', (req, res) => {
+    res.render('Assignment_s5.ejs');
+})
+
+
+router.get('/Assignment_r6', (req, res) => {
+    res.render('Assignment_r6.ejs');
+})
+router.get('/Assignment_db6', (req, res) => {
+    res.render('Assignment_db6.ejs');
+})
+router.get('/Assignment_s6', (req, res) => {
+    res.render('Assignment_s6.ejs');
+})
 module.exports = router

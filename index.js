@@ -1,11 +1,12 @@
 const express = require('express');
-// const ejs = require('ejs');
+const ejs = require('ejs');
 require('dotenv').config();
 const session=require('express-session');
 const flash=require('connect-flash');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const Message = require('./dbmongo');
+
+
 const Redis = require('ioredis');
 //const Redis = require('redis');
 const RedisStore = require("connect-redis").default;
@@ -14,14 +15,27 @@ const generalRouter = require('./routes/general');
 const bookingRouter = require('./routes/booking');
 const adminRouter = require('./routes/admin');
 const chatRouter = require('./routes/chatting');
+const ratingRouter = require('./routes/rating');
+const ratingRouter2 = require('./routes/rating2');
+const ratingRouter3 = require('./routes/rating3');
+const ratingRouter4 = require('./routes/rating4');
+const ratingRouter5 = require('./routes/rating5');
+const ratingRouter6 = require('./routes/rating6');
 
 
 const app = express();
 
-mongoose.connect('mongodb+srv://Do_Trang:admin12345@dbms.l8swf6y.mongodb.net/?retryWrites=true&w=majority&appName=dbmst', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+mongoose.connect('mongodb+srv://Tran_Thao:11082004@bookinghotel.vy2lwub.mongodb.net/?retryWrites=true&w=majority&appName=bookingHotel', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => {
+    console.log('Connected to MongoDB Atlas');
+})
+.catch(error => {
+    console.error('Error connecting to MongoDB Atlas:', error);
 });
+
 
 const clientRedis = Redis.createClient(); //default localhost
 
@@ -55,13 +69,20 @@ app.use((req,res,next)=>{
   next();
 })
 
+app.use(bodyParser.json());
+
+
 app.use(generalRouter);
 app.use(usersRouter);
 app.use(bookingRouter);
 app.use(adminRouter);
 app.use(chatRouter);
-
-
+app.use(ratingRouter);
+app.use(ratingRouter2);
+app.use(ratingRouter3);
+app.use(ratingRouter4);
+app.use(ratingRouter5);
+app.use(ratingRouter6);
 
 
 app.get('/get-session', (req, res) =>{

@@ -196,8 +196,16 @@ select room.id, room.number, room.type_id,
 from room
 left join room_reserved rr on room.id = rr.room_id
 left join reservation r on rr.reservation_id = r.id
-left join booker on r.booker_id = booker.id
--- INSERT SOME NECESSARY FOR THE APP
+left join booker on r.booker_id = booker.id;
+-- INSERT SOME NECESSARY FOR THE APP    
+insert into type(name,capacity)
+values 
+('single',1),
+('double',2),
+('triple',3),
+('quad',4),
+('president',2),
+('rooftop',2);
 
 ALTER TABLE type
 ADD COLUMN description TEXT,
@@ -251,16 +259,6 @@ SET
 	link = '/detail6',
     image = 'images/room-6.jpg'
 WHERE id = 6;
-
-    
-insert into type(name,capacity)
-values 
-('single',1),
-('double',2),
-('triple',3),
-('quad',4),
-('president',2),
-('rooftop',2);
       
 insert into room (number,type_id)
 values 

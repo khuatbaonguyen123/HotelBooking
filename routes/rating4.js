@@ -1,59 +1,59 @@
 const express = require('express');
 const router = express.Router();
+const Rating = require('../model_mongodb/dbmongo4.js');
 const db = require('../database');
+let cnt = 0;
+
 
 router.post('/submit4', async (req, res) => {
-    const { rating } = req.body; // Trích xuất giá trị của opinion và rating từ req.body
+    const { rating } = req.body; 
 
-    // Kiểm tra nếu opinion hoặc rating là null, không thực hiện truy vấn chèn dữ liệu
     if (!rating) {
-        return res.status(400).json({ error: 'Opinion and rating are required fields.' });
+        return res.status(400).json({ error: 'Rating is a required field.' });
     }
 
-    // Nếu không có giá trị null, thực hiện truy vấn chèn dữ liệu
-    db.beginTransaction((err) => {
-        if (err) throw err;
+    const dbquery = 'SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = 4;';
+    db.query(dbquery, [req.session.userId], async (err, results) => {
+    if (err) {
+        // Xử lý lỗi
+        console.error('Error querying database:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 
-        db.query(`INSERT INTO rating4 (rating) VALUES ('${rating}')`, (err, result) => {
-            if (err) {
-                db.rollback(() => {
-                    throw err;
-                });
-            }
-
-            db.commit((err) => {
-                if (err) {
-                    db.rollback(() => {
-                        throw err;
-                    });
-                }
-                res.redirect('/detail4'); // Chuyển hướng sau khi lưu thành công
-            });
-        });
-    });
-});
-
-router.get('/data4', (req, res) => {
-    const dataQuery = 'SELECT rating, COUNT(*) AS count FROM rating4 GROUP BY rating';
-    db.query(dataQuery, (err, results) => {
-        if (err) {
-            console.error('Error retrieving data:', err);
-            return res.status(500).json({ error: 'Internal server error' });
+    if (results.length === 0) {
+        // Trả về thông báo lỗi "Chưa đánh giá"
+        console.log('Chưa thuê phòng');
+        return res.redirect('/Assignment_r4');
+    }
+    // Thực hiện hành động khi kết quả không rỗng
+    try{
+        for (let i = 0; i < results.length; i ++) {
+            const userId = results[i].booker_id;
+            // const dateIn = results[i].date_in;
+            const newRating = await Rating.create({ rating, idUser: userId });
+            res.redirect('/Assignment_s4');
         }
-
-        // Khởi tạo mảng dữ liệu trống
-        let data = [];
-
-        // Duyệt qua kết quả truy vấn và cập nhật mảng dữ liệu
-        results.forEach(row => {
-            const stars = row.rating;
-            const count = row.count;
-            data.push({ 'stars': stars, 'count': count });
-        });
-
-        // Trả về mảng dữ liệu đã cập nhật dưới dạng JSON
-        res.json(data); 
-    });
+    }
+    catch {
+        console.error('Đã đánh giá', err);
+        return res.redirect('/Assignment_db4');
+    }
 });
 
-module.exports = router;
+});
+
+
+router.get('/data4', async (req, res) => {
+    try {
+        const data = await Rating.aggregate([
+            { $group: { _id: '$rating', count: { $sum: 1 } } },
+            { $project: { _id: 0, stars: '$_id', count: 1 } }
+        ]);
+        res.json(data);
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+module.exports = router; 
