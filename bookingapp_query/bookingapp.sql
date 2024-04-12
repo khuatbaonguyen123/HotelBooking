@@ -119,6 +119,8 @@ DEFAULT CHARACTER SET = utf8mb4;
 -- INDEXS
 
 create index email_idx on account(email);
+
+
 -- for further improvement of app we can add some other index to improve running speed
 
 -- SOME EVENT OR TRIGGER OR PROCEDURE OR FUNCTION
@@ -150,6 +152,7 @@ BEGIN
     RETURN totalPrice;
 END$$
 DELIMITER ;
+
 
 -- this trigger is to update the date_out of reservation and payment when guest want to checkout early
 delimiter //
@@ -200,7 +203,7 @@ from room
 left join room_reserved rr on room.id = rr.room_id
 left join reservation r on rr.reservation_id = r.id
 left join booker on r.booker_id = booker.id;
-<<<<<<< HEAD
+
 -- INSERT SOME NECESSARY FOR THE APP    
 insert into type(name,capacity)
 values 
@@ -263,9 +266,7 @@ SET
 	link = '/detail6',
     image = 'images/room-6.jpg'
 WHERE id = 6;
-=======
--- INSERT SOME NECESSARY FOR THE APP
-    
+
 insert into type(name,capacity, description, link, image)
 values 
 ('single',1,'A spacious sigle room which has large single bed, locates between the 4th and 13rd floor 
@@ -280,8 +281,7 @@ values
                                 the President Suites are beautifully decorated in elegant tones that create a distinctive atmosphere.','/detail5','images/room-5.jpg'),
 ('rooftop',2,'Nestled on the top floor, the Rooftop Suite provides an ingenious blend of luxury and private living, 
                                 featuring the full range of first class hotel services.','/detail6','images/room-6.jpg');
->>>>>>> a95ab3ac22da80b097e3db9aad4da283271b2468
-      
+
 insert into room (number,type_id)
 values 
 (201,1),
