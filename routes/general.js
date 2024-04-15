@@ -17,6 +17,7 @@ router.get('/rooms', (req, res) => {
                   "join month_price m on t.id = m.type_id " +
                   "where m.month = extract(month from NOW());"
     db.query(query, (err, data) => {
+        console.log(data);
         if (err) throw err;
         else
             res.render('rooms.ejs', {data});
@@ -131,4 +132,44 @@ router.get('/Assignment_db6', (req, res) => {
 router.get('/Assignment_s6', (req, res) => {
     res.render('Assignment_s6.ejs');
 })
+
+router.get('/get_data', function(req, res){
+    var type = req.query.parent_value;
+    var query = "";
+    if(type == 'Price') {
+        query = "select name, description, link, image, price_each_day from type t " + 
+        "join month_price m on t.id = m.type_id " +
+        "where m.month = extract(month from NOW()) " +
+        "order by price_each_day asc;";
+    }
+    if(type == 'Popularity') {
+        query = "select name, description, link, image, price_each_day from type t " + 
+        "join month_price m on t.id = m.type_id " +
+        "join (select count(*) as cnt, room.type_id from room_reserved rr " +
+        "join room on room.id = rr.room_id " + 
+        "group by room.type_id) as T using (type_id) " + 
+        "where m.month = extract(month from NOW()) " +
+        "order by T.cnt asc;";
+    }
+    if(type == 'Spacing') {
+        query = "select name, description, link, image, price_each_day from type t " + 
+        "join month_price m on t.id = m.type_id " +
+        "where m.month = extract(month from NOW()) " +
+        "order by capacity asc;";
+    }
+    console.log(query);
+    db.query(query, function(err, data){
+        if (err) throw err;
+    
+        var data_arr = [];
+
+        data.forEach(function(row){
+            data_arr.push(row.Data);
+        });
+
+        console.log(data);
+        res.json(data);
+
+    });
+});
 module.exports = router
