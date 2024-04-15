@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 const ratingSchema = new mongoose.Schema({
   rating:  { type: Number, required: true },
-  idUser: { type: Number, required: true, unique: true },
-  // date_in: {type: Date, require: true},
+  idUser: { type: Number, required: true, unique: true},
   timestamp: { type: Date, default: Date.now }
 });
 

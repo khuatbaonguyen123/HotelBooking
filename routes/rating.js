@@ -14,7 +14,7 @@ router.post('/submit', async (req, res) => {
         return res.status(400).json({ error: 'Rating is a required field.' });
     }
 
-    const dbquery = 'SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = 1;';
+    const dbquery = "SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = 1 AND re.status = 'checkout';";
     db.query(dbquery, [req.session.userId], async (err, results) => {
     if (err) {
         // Xử lý lỗi
@@ -31,8 +31,9 @@ router.post('/submit', async (req, res) => {
     try{
         for (let i = 0; i < results.length; i ++) {
             const userId = results[i].booker_id;
+          
             // const dateIn = results[i].date_in;
-            const newRating = await Rating.create({ rating, idUser: userId });
+            const newRating = await Rating.create({ rating, idUser: userId});
             res.redirect('/Assignment_s');
         }
     }
