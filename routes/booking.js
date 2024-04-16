@@ -33,7 +33,7 @@ async function getRoomsOfType(roomType, arrivalDate, departureDate) {
     let response;
     try {
         response = await new Promise((resolve, reject) => {
-            slaveConnection.query(`SELECT number 
+            db.query(`SELECT number 
                     FROM room 
                     WHERE type_id = ?
                     AND id NOT IN (
