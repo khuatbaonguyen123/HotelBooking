@@ -12,7 +12,7 @@ router.post('/submit2', async (req, res) => {
         return res.status(400).json({ error: 'Rating is a required field.' });
     }
 
-    const dbquery = 'SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = 2;';
+    const dbquery = "SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = 2 AND re.status = 'checkout';";
     db.query(dbquery, [req.session.userId], async (err, results) => {
     if (err) {
         // Xử lý lỗi
