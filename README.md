@@ -38,7 +38,7 @@
     START SLAVE;
     SHOW SLAVE STATUS\G;  // check if the replication has been started
     SHOW DATABASES;
-```
+  ```
 ## Setup
 1. Press the **Fork** button (top right the page) to save copy of this project on your account.
 2. Download the repository files (project) from the download section or clone this project to your local machine by typing in the bash the following command:
