@@ -105,7 +105,7 @@
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script type="text/javascript">
-    const socket = io("http://localhost:3001");
+    const socket = io("http://13.229.49.254:3001");
 
     socket.on("server_send_message", (msg) => {
         $(".messages-ul").append(
@@ -130,7 +130,7 @@
     });
 
     $.ajax({
-        url: "http://localhost:3001/messages",
+        url: "http://13.229.49.254:3001/messages",
         type: "GET",
         success: function (data) {
             data?.forEach((msg) => {
@@ -152,7 +152,7 @@
             console.log("Selected chatId:", chatId);
             document.getElementById('user_id').value = chatId;
              $.ajax({
-                url: `http://localhost:3001/messages/search?user_id=${chatId}`,
+                url: `http://13.229.49.254:3001/messages/search?user_id=${chatId}`,
                 type: "GET", 
                 success: function (data) {
                     $(".messages-ul").empty()

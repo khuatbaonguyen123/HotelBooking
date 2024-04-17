@@ -132,7 +132,7 @@
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script type="text/javascript">
-    const socket = io("http://localhost:3001");
+    const socket = io("http://13.229.49.254:3001");
 
     socket.on("server_send_message", (msg) => {
       $(".messages-ul").append(
@@ -157,7 +157,7 @@
     });
 
     $.ajax({
-      url:  "http://localhost:3001/messages/search?user_id=<%= user.user_id %>",
+      url:  "http://13.229.49.254:3001/messages/search?user_id=<%= user.user_id %>",
       type: "GET",
       success: function (data) {
         data?.forEach((msg) => {
