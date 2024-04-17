@@ -29,7 +29,7 @@ const ratingRouter6 = require('./routes/rating6');
 const app = express();
 
 
-mongoose.connect('mongodb+srv://Tran_Thao:11082004@bookinghotel.vy2lwub.mongodb.net/?retryWrites=true&w=majority&appName=bookingHotel', {
+mongoose.connect(process.env.MONGOLOCAL_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
