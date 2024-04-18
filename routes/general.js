@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const db=require('../database');
 const bcrypt=require('bcrypt');
+const { route } = require('./users');
 
 router.get('/',(req,res)=>{
     res.redirect('/index');
@@ -160,16 +161,23 @@ router.get('/get_data', function(req, res){
     console.log(query);
     db.query(query, function(err, data){
         if (err) throw err;
-    
-        var data_arr = [];
-
-        data.forEach(function(row){
-            data_arr.push(row.Data);
-        });
-
         console.log(data);
         res.json(data);
 
     });
+});
+
+router.post('/room_search', function(req, res) {
+    const { search } = req.body;
+    const query = `select distinct name, description, link, image, price_each_day from type t
+                  join month_price m on t.id = m.type_id
+                  where m.month = extract(month from NOW()) and
+                  match(description) against('${search}');`;
+    db.query(query, (err, data) => {
+        console.log(data);
+        if (err) throw err;
+        else
+            res.render('rooms.ejs', {data});
+    })
 });
 module.exports = router
