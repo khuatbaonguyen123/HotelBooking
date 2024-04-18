@@ -105,7 +105,10 @@
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script type="text/javascript">
-    const socket = io("http://13.229.49.254:3001");
+
+    const IP = "<%= process.env.CHAT_IP %>";
+    const PORT = "<%= process.env.CHAT_PORT %>";
+    const socket = io(`http://${IP}:${PORT}`);
 
     socket.on("server_send_message", (msg) => {
         $(".messages-ul").append(
@@ -130,7 +133,7 @@
     });
 
     $.ajax({
-        url: "http://13.229.49.254:3001/messages",
+        url: `http://${IP}:${PORT}/messages`,
         type: "GET",
         success: function (data) {
             data?.forEach((msg) => {
@@ -140,9 +143,6 @@
             });
         },
     });
-</script>
-
-<script>
     document.querySelectorAll('.user-id').forEach(link => {
         link.addEventListener('click', (event) => {
             event.preventDefault();
@@ -152,7 +152,7 @@
             console.log("Selected chatId:", chatId);
             document.getElementById('user_id').value = chatId;
              $.ajax({
-                url: `http://13.229.49.254:3001/messages/search?user_id=${chatId}`,
+                url: `http://${IP}:${PORT}/messages/search?user_id=${chatId}`,
                 type: "GET", 
                 success: function (data) {
                     $(".messages-ul").empty()
