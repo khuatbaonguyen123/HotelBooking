@@ -1,7 +1,7 @@
 ### Technical Specifications
 * Frontend: EJS, CSS, Javascript
-* Backend: ExpressJS
-* Database: MySQL
+* Backend: ExpressJS, NodeJS
+* Database: MySQL, MongoDB, Redis
 
 ### Features
 - Authentication: Login, signup, resetPassword, updatePassword
@@ -12,12 +12,14 @@
   - Create, read, update the booking status
   - Search booking information 
   - Checkin - checkout
+  - Chat
 - Users:
   - Update user information
   - Review room types and prices
   - Booking validation
   - Recommend the rooms number for each chosen room type 
   - Bill displaying
+  - Chat
 
 ### Configure Replication for MySQL
 1. Open MySQL Command Line Client

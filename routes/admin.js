@@ -312,30 +312,14 @@ router.get("/admin/rooms", isLoggedInAdmin, (req, res) => {
 
 router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
-  db.query(
-    `select r.status from reservation r join room_reserved rv on rv.reservation_id = r.id where rv.room_id = '${id}'`,
-    (error, result) => {
-      console.log(result[0].status);
-      let status = result[0].status;
-      if (error) throw error;
-      else if (
-        status == "accept" ||
-        status == "checkin" ||
-        status == "pending"
-      ) {
-        res.redirect("/admin/rooms");
-      } else {
-        console.log(result.status);
-        db.query(`delete from room where id = '${id}'`, (err, room) => {
-          if (err) throw err;
-          else {
-            console.log(room);
-            res.redirect("/admin/rooms");
-          }
-        });
-      }
+  console.log(id);
+  db.query(`delete from room where id = '${id}'`, (err, room) => {
+    if (err) throw err;
+    else {
+      console.log(room);
+      res.redirect("/admin/rooms");
     }
-  );
+  });
 });
 
 // router.post("/admin/editRoom", isLoggedInAdmin, (req, res) => {
@@ -362,7 +346,7 @@ router.post("/admin/roomlist", isLoggedInAdmin, (req, res) => {
   const { id } = req.query;
   console.log(id);
   db.query(
-    `select number, status, booker
+    `select id, number, status, booker
       from vroomlist
       where type_id =${id}`,
     (err, data) => {

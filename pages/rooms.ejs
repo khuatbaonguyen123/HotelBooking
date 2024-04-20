@@ -49,6 +49,15 @@
         <div class="container container-medium">
             <div class="row row-2">
                 <h2>Rooms</h2>
+                <div align="center">
+                    <form method="post" action="/room_search">
+                        <input type="search" name="search" placeholder="Search room name here ..." style="background-color: #eee;
+                        border: 1px solid #000; padding: 12px 15px; margin: 8px 0;">
+                        <button style="background-color: #455d58; color: white; 
+                        border: none; padding: 12px; margin: 5px; cursor: pointer;
+                        border-radius: 5px;">Search</button>
+                    </form>
+                </div>
                 <select name="sort" id="sort" style="width: 15%;">
                     <option value="">Default</option>
                     <option value="Price">Sort by Price</option>
@@ -74,6 +83,7 @@
                             </div>
                         </div>
                     </div>
+                    <% if(i <data.length) { %>
                     <div class="col-2">
                         <div class="room-image">
                             <img src=<%= data[i].image %> alt="room">
@@ -89,6 +99,7 @@
                             </div>
                         </div>
                     </div>
+                    <% } %>
                 </div>
                 <% } %>
             </div>
