@@ -90,12 +90,14 @@ CREATE TABLE room_reserved (
 
 -- this table is to update price for each month and year
 CREATE TABLE month_price (
-  type_id int,
-  month int,
-  year int,
-  price_each_day int,
-  PRIMARY KEY (type_id, month, year),
-  CONSTRAINT FK_month_price_type_id FOREIGN KEY (type_id) references type(id)
+  id INT AUTO_INCREMENT,
+  type_id INT,
+  month INT,
+  year INT,
+  price_each_day INT,
+  PRIMARY KEY (id),
+  UNIQUE (type_id, month, year),
+  CONSTRAINT FK_month_price_type_id FOREIGN KEY (type_id) REFERENCES type(id)
 );
 
 CREATE TABLE payment (
@@ -173,7 +175,6 @@ DELIMITER ;
 CREATE EVENT update_status_event
 ON SCHEDULE EVERY 1 DAY
 DO
-
     UPDATE reservation
     SET status = 'decline'
     WHERE status = 'accept' AND date_in < curdate();
