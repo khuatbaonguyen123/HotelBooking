@@ -16,24 +16,34 @@ function isLoggedIn(req,res,next)
     else res.redirect('/loginform');
 }
 
+function containsSpecialCharacters(str) {
+    const regex = /\./;;
+    return regex.test(str);
+}
+
 async function getCheckLink(Input) {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.goto('https://safeweb.norton.com/');
-    await page.waitForSelector("input[type='url']", { timeout: 3000 });
-    const input = await page.$("input[type='url']");
-    await input.type(Input);
-    await input.press('Enter');
-    try {
-        await page.waitForNavigation()
-        const ratingElement = await page.$("p.rating-label.xl-body-text-bold");
-        const ratingText = await page.evaluate(ratingElement => ratingElement.textContent, ratingElement);
-        await browser.close();
-        return ratingText;
-        
+    if (containsSpecialCharacters(Input)) {
+        const browser = await puppeteer.launch({ headless: true });
+        const page = await browser.newPage();
+        await page.goto('https://safeweb.norton.com/');
+        await page.waitForSelector("input[type='url']", { timeout: 2000 });
+        const input = await page.$("input[type='url']");
+        await input.type(Input);
+        await input.press('Enter');
+        try {
+            await page.waitForNavigation()
+            const ratingElement = await page.$("p.rating-label.xl-body-text-bold");
+            const ratingText = await page.evaluate(ratingElement => ratingElement.textContent, ratingElement);
+            await browser.close();
+            return ratingText;
+            
+        }
+        catch {
+            await browser.close();
+            return "Not Link";
+        }
     }
-    catch {
-        await browser.close();
+    else {
         return "Not Link";
     }
 }
@@ -212,25 +222,34 @@ router.get('/editProfile', isLoggedIn, (req, res) => {
     
 })
 
-router.post('/editProfile',isLoggedIn,(req,res)=>{
+router.post('/editProfile',isLoggedIn, async(req,res)=>{
     //check not duplicated email
     const {id,fname,lname,email,phone,dob}=req.body;
-    db.query(`select * from account where email='${email}' and id<>${id}`,(err,results)=>{
-        if (err) throw err;
-        if (results.length>0) //duplicated email
-        {
-            // res.json({error:'Email already registered'})
-            req.flash('error','Email already registered');
-            res.redirect(`/editProfile?id=${id}`);
+    
+    let checkfName = await getCheckLink(fname);
+    console.log("fname:" + checkfName);
+    if (checkfName === "Not Link" || checkfName === "Safe") {
+        let checklName = await getCheckLink(lname);
+        console.log("lname:" + checklName);
+        if (checklName === "Not Link" || checklName === "Safe") {
+            db.query(`select * from account where email='${email}' and id<>${id}`,(err,results)=>{
+                if (err) throw err;
+                if (results.length>0) //duplicated email
+                {
+                    // res.json({error:'Email already registered'})
+                    req.flash('error','Email already registered');
+                    res.redirect(`/editProfile?id=${id}`);
+                }
+                else  db.query(`update account, booker
+                                set first_name='${fname}',last_name='${lname}',email='${email}',phone='${phone}',birth_date='${dob}'
+                                where account.id=booker.id
+                                and account.id=${id}`,(err)=>{
+                                    if (err) throw err;
+                                    res.redirect('/profile');
+                })
+            })
         }
-        else  db.query(`update account, booker
-                        set first_name='${fname}',last_name='${lname}',email='${email}',phone='${phone}',birth_date='${dob}'
-                        where account.id=booker.id
-                        and account.id=${id}`,(err)=>{
-                            if (err) throw err;
-                            res.redirect('/profile');
-        })
-    })
+    }
    
 })
 
@@ -249,38 +268,40 @@ router.get('/editPassword', isLoggedIn, (req, res) => {
     
 })
 
-router.post('/editPassword',isLoggedIn, (req,res)=>{
+router.post('/editPassword',isLoggedIn, async (req,res)=>{
     const {id,oldPassword,newPassword,newPassword2}=req.body;
-    db.query(`select password from account where id=${id}`,(err,results)=>{
-        if (err) throw err;
-        if (results.length>0)  //account exists
-        {
-            const {password}=results[0];
-            bcrypt.compare(oldPassword,password,async (err,isMatch)=>{
-                if (err) throw err;
-                if (isMatch)  //password valid
-                {
-                    if (newPassword===newPassword2)  //new password confirmed
+    let CheckOldPassword = getCheckLink(oldPassword);
+    if (CheckOldPassword === "Not Link" || CheckOldPassword === "Safe") {
+        let CheckNewPassword = getCheckLink(newPassword);
+        if (CheckNewPassword === "Not Link" || CheckNewPassword === "Safe") {
+                db.query(`select password from account where id=${id}`,(err,results)=>{
+                    if (err) throw err;
+                    if (results.length>0)  //account exists
                     {
-                        let hashedPassword= await bcrypt.hash(newPassword,10);
-                        db.query(`update account set password='${hashedPassword}' where id=${id}`,(err)=>{
+                        const {password}=results[0];
+                        bcrypt.compare(oldPassword,password,async (err,isMatch)=>{
                             if (err) throw err;
-                            res.redirect('/profile');
+                            if (isMatch)  //password valid
+                            {
+                                if (newPassword===newPassword2)  //new password confirmed
+                                {
+                                    let hashedPassword= await bcrypt.hash(newPassword,10);
+                                    db.query(`update account set password='${hashedPassword}' where id=${id}`,(err)=>{
+                                        if (err) throw err;
+                                        res.redirect('/profile');
+                                    })
+                                }
+                            }
+                            else {
+                                req.flash('error','You enter the wrong password');
+                                res.redirect(`/editPassword?id=${id}`);
+                            }
                         })
                     }
-                    else {
-                        req.flash('error','New password is not matching');
-                        res.redirect(`/editPassword?id=${id}`);
-                    }
-                }
-                else {
-                    req.flash('error','You enter the wrong password');
-                    res.redirect(`/editPassword?id=${id}`);
-                }
-            })
+                    else res.redirect('/index');
+                })
         }
-        else res.redirect('/index');
-    })
+    }
 
 })
 
