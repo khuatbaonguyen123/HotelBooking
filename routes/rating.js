@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 const Rating = require('../model_mongodb/dbmongo.js');
-
-const db = require('../database');
+const db = require('../connect_redis.js');
+const cli = require('../connect_redis.js');
 let cnt = 0;
 
 
@@ -48,6 +48,14 @@ router.post('/submit', async (req, res) => {
 
 router.get('/data', async (req, res) => {
     try {
+        cli.zincrby('myzset', 1, '1', (err, reply) => {
+            if (err) {
+              console.error('Error incrementing score:', err);
+            }
+          
+            console.log('New score of member "room1":');
+            cli.zscore('myzset', '1', (err, reply) => {console.log(reply);})
+        });
         const data = await Rating.aggregate([
             { $group: { _id: '$rating', count: { $sum: 1 } } },
             { $project: { _id: 0, stars: '$_id', count: 1 } }

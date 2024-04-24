@@ -59,7 +59,7 @@
                     </form>
                 </div>
                 <select name="sort" id="sort" style="width: 15%;">
-                    <option value="">Default</option>
+                    <option value="Default">Default</option>
                     <option value="Price">Sort by Price</option>
                     <option value="Reviews">Sort by Reviews</option>
                     <option value="Popularity">Sort by Popularity</option>
@@ -91,7 +91,7 @@
                         <div class="room-info">
                             <div>
                                 <div>
-                                    <h4> <%= data[i].name %> ROOM </h4>
+                                    <h4> <%= data[i].name %> ROOM</h4>
                                     <p> <%= data[i].description%> </p>
                                     <p class="price"><span><%= data[i].price_each_day %></span> / night</p>
                                     <a href=<%= data[i].link %>>More Details</a>
@@ -199,7 +199,7 @@ function fetch_data(parent_element, child_element)
                                 </div>
                                 <div class="room-info">
                                     <div>
-                                        <h4>` + data[i].name + `ROOM</h4>
+                                        <h4>` + data[i].name + ` ROOM</h4>
                                         <p>` + data[i].description + `</p>
                                         <p class="price"><span>` + data[i].price_each_day + `</span> / night</p>
                                         <a href=` + data[i].link + `>More Details</a>
@@ -215,7 +215,7 @@ function fetch_data(parent_element, child_element)
                             <div class="room-info">
                                 <div>
                                     <div>
-                                        <h4>` + data[i].name + `ROOM</h4>
+                                        <h4>` + data[i].name + ` ROOM</h4>
                                         <p>` + data[i].description + `</p>
                                         <p class="price"><span>` + data[i].price_each_day + `</span> / night</p>
                                         <a href=` + data[i].link + `>More Details</a>

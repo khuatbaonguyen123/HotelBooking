@@ -5,7 +5,7 @@ use bookingapp;
 -- we do not concern about the info of admin so we don't need admin table 
 CREATE TABLE account (
   id int AUTO_INCREMENT primary key,
-  email varchar(255) not null,
+  email nvarchar(255) not null,
   password varchar(255) not null,
   type_of_account ENUM ('booker', 'admin') default 'booker' -- the admin account is only can be created in the sql server;
 );
