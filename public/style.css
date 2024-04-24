@@ -30,8 +30,8 @@
     --main-font-1: "Josefin Sans Regular", sans-serif;
     --main-font-2: "Josefin Sans Light", sans-serif;
     --secondary-font: "SourceSansPro Regular", sans-serif;
-    --main-color: #455d58;
-    --white-pinkish-color: #FAF2F7;
+    --main-color: #c29c76;
+    --white-pinkish-color: #222222;
     --white-color: #fff;
 }
 
@@ -272,7 +272,7 @@ header {
     bottom: 0;
     height: .2rem;
     width: 100%;
-    background-color: rgba(69, 93, 88, 0.65);
+    background-color: rgba(136, 115, 78, 0.65);
     transform: scaleX(0);
     transform-origin: right;
     transition: transform .4s linear;
@@ -332,7 +332,7 @@ header {
 
 /* Change the background color of the dropdown button when the dropdown content is shown */
 .dropdown:hover .dropbtn {
-    background-color: #3e8e41;
+    background-color: var(--main-color);
 }
 
 label {
@@ -388,10 +388,10 @@ table thead {
 	background: #0e1211;
 }
 table tr:nth-child(odd) {
-	background: #66857f;
+	background: var(--main-color);
 }
 table tr:nth-child(even) {
-	background: #3d524e;
+	background: var(--main-color);
 }
 table th, table td {
 	padding: 20px 40px;
@@ -402,7 +402,7 @@ table th, table td {
 }
 
 .hero {
-    background-image: linear-gradient(to right bottom, rgba(40, 180, 133, 0.8), rgb(69, 93, 88, 0.5)), url("images/hero-bg.jpg");
+    background-image: linear-gradient(to right bottom, rgba(21, 21, 21, 0.8), rgba(61, 56, 56, 0.5)), url("images/hero1-bg.jpg");
     background-size: cover;
     background-position: center;
     height: calc(100vh - 7.5rem);
@@ -511,7 +511,7 @@ table th, table td {
 /* footer section */
 
 footer {
-    background-color: var(--main-color);
+    background-color: #1c1c1c;
     font-family: var(--main-font-2);
     padding: 7rem 0 4rem;
     position: relative;
@@ -568,6 +568,7 @@ footer {
     color: var(--main-color);
     padding: 0;
     padding-bottom: 10rem;
+    /* background-color: #f9f9f9; */
 }
 
 .row-2 {
@@ -583,6 +584,8 @@ footer {
     outline: none;
     background: transparent;
     font-family: var(--main-font-1);
+    color:  var(--main-color);
+    
 }
 
 .rooms-list img,
@@ -597,7 +600,8 @@ footer {
 .room-info {
     text-align: center;
     padding: 1rem;
-    background-color: var(--white-color);
+    background-color:#e5e5e5;
+    color: var(--white-pinkish-color);
 }
 
 .room-info div {
@@ -690,9 +694,9 @@ footer {
 .sub-headline {
     font-size: 8.5rem;
     font-family: "Herr Von Muellerhoff", cursive;
-    color: #55917f;
-    font-weight: 100;
-    line-height: .4;
+    color: var(--main-color);
+    font-weight: 300;
+    line-height: .8;
     letter-spacing: 2px;
     text-transform: capitalize;
 }
@@ -707,11 +711,11 @@ footer {
 }
 
 .features {
-    background-color: var(--main-color);
+    background-color: var(--white-pinkish-color);
 }
 
 .features i {
-    color: #ce8571;
+    color: #dedede;
     font-size: 2.8rem;
     margin-bottom: 1.5rem;
 }
@@ -729,6 +733,7 @@ footer {
 
 .brands {
     padding: 5rem 0;
+    background-color: var(--main-color);
 }
 
 .brands .slider-box img {
@@ -741,7 +746,7 @@ footer {
 /* Contact page */
 
 .contact {
-    color: var(--main-color);
+    color: #ccc;
 }
 
 .contact h3 {
@@ -760,11 +765,12 @@ footer {
     display: block;
     width: 100%;
     background: transparent;
-    border: 1px solid rgba(0, 0, 0, .18);
+    border: 1px solid rgba(255, 208, 0, 0.18);
     outline: none;
     padding: 1.7rem 1.5rem;
     font-family: var(--main-font-2);
     font-size: 1.8rem;
+    color: var(--white-color);
     margin-bottom: 3rem;
     transition: all .5s;
 }
@@ -825,7 +831,7 @@ textarea {
 
 
 .add-btn, .delete-btn {
-    background-color: #4CAF50;
+    background-color: var(--main-color);
     color: white;
     border: none;
     padding: 10px;
@@ -835,7 +841,7 @@ textarea {
 }
 
 .add-btn:hover, .delete-btn:hover {
-    background-color: #3e8e41;
+    background-color: #8a6e52;
 }
 
 .delete-btn[disabled] {
@@ -862,9 +868,9 @@ textarea {
   }
 
   .alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: var(--main-color);
+    color: #8a6e52;
+    border: 1px solid var(--main-color);
     padding: 15px;
     margin-bottom: 20px;
     font-size: 2rem;
