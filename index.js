@@ -5,10 +5,7 @@ const session=require('express-session');
 const flash=require('connect-flash');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-
-
-const Redis = require('ioredis');
-//const Redis = require('redis');
+const clientRedis = require("./connect_redis");
 const RedisStore = require("connect-redis").default;
 const usersRouter = require('./routes/users');
 const generalRouter = require('./routes/general');
@@ -43,15 +40,15 @@ mongoose.connect(process.env.MONGOLOCAL_URL, {
 });
 
 
-const clientRedis = Redis.createClient(); //default localhost
+// const clientRedis = Redis.createClient(); //default localhost
 
-clientRedis.on('connect', function(){
-  console.log('Connected to Redis...');
-});
+// clientRedis.on('connect', function(){
+//   console.log('Connected to Redis...');
+// });
 
-clientRedis.on('error', (err) =>{
-  console.log('Redis error: ', err);
-});
+// clientRedis.on('error', (err) =>{
+//   console.log('Redis error: ', err);
+// });
 
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(session({

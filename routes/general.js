@@ -4,6 +4,8 @@ const path = require('path');
 const db=require('../database');
 const bcrypt=require('bcrypt');
 const { route } = require('./users');
+const cli = require('../connect_redis.js');
+const { isModuleNamespaceObject } = require('util/types');
 
 router.get('/',(req,res)=>{
     res.redirect('/index');
@@ -11,18 +13,6 @@ router.get('/',(req,res)=>{
 
 router.get('/index', (req, res) => {
     res.render('index.ejs', {message: req.flash('success')});
-})
-
-router.get('/rooms', (req, res) => {
-    const query = "select distinct name, description, link, image, price_each_day from type t " + 
-                  "join month_price m on t.id = m.type_id " +
-                  "where m.month = extract(month from NOW());"
-    db.query(query, (err, data) => {
-        console.log(data);
-        if (err) throw err;
-        else
-            res.render('rooms.ejs', {data});
-    })
 })
 
 router.get('/about', (req, res) => {
@@ -134,37 +124,87 @@ router.get('/Assignment_s6', (req, res) => {
     res.render('Assignment_s6.ejs');
 })
 
-router.get('/get_data', function(req, res){
-    var type = req.query.parent_value;
-    var query = "";
-    if(type == 'Price') {
-        query = "select name, description, link, image, price_each_day from type t " + 
-        "join month_price m on t.id = m.type_id " +
-        "where m.month = extract(month from NOW()) " +
-        "order by price_each_day asc;";
-    }
-    if(type == 'Popularity') {
-        query = "select name, description, link, image, price_each_day from type t " + 
-        "join month_price m on t.id = m.type_id " +
-        "join (select count(*) as cnt, room.type_id from room_reserved rr " +
-        "join room on room.id = rr.room_id " + 
-        "group by room.type_id) as T using (type_id) " + 
-        "where m.month = extract(month from NOW()) " +
-        "order by T.cnt asc;";
-    }
-    if(type == 'Spacing') {
-        query = "select name, description, link, image, price_each_day from type t " + 
-        "join month_price m on t.id = m.type_id " +
-        "where m.month = extract(month from NOW()) " +
-        "order by capacity asc;";
-    }
-    console.log(query);
-    db.query(query, function(err, data){
-        if (err) throw err;
-        console.log(data);
-        res.json(data);
-
+async function getSort() {
+    return new Promise((resolve, reject) => {
+      cli.zrevrange('myzset', 0, -1, (err, members) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(members);
+      });
     });
+}
+
+async function getInfo(i) {
+    return new Promise(async (resolve, reject) => {
+        db.query(`select name, description, link, image, price_each_day from type t 
+                    join month_price m on t.id = m.type_id 
+                    where m.month = extract(month from NOW()) and id =  ${i};`, 
+                    (err, result) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(result);       
+        })
+    });
+}
+  
+router.get('/rooms', async (req, res) => {
+    let mem = await getSort();
+        console.log(mem);
+        var data = [];
+        for(let i = 0; i < mem.length; i++) {
+            let dataRow = await getInfo(mem[i]);
+            data.push(dataRow[0]);
+        }
+        res.render('rooms.ejs', {data});
+})
+
+router.get('/get_data', async (req, res) =>{
+    var type = req.query.parent_value;
+    if(type == 'Default') {
+        let mem = await getSort();
+        console.log(mem);
+        var data = [];
+        for(let i = 0; i < mem.length; i++) {
+            let dataRow = await getInfo(mem[i]);
+            data.push(dataRow[0]);
+        }
+        res.json(data);
+    }
+    else {
+        var query = "";
+        if(type == 'Price') {
+            query = "select name, description, link, image, price_each_day from type t " + 
+            "join month_price m on t.id = m.type_id " +
+            "where m.month = extract(month from NOW()) " +
+            "order by price_each_day asc;";
+        }
+        if(type == 'Popularity') {
+            query = "select name, description, link, image, price_each_day from type t " + 
+            "join month_price m on t.id = m.type_id " +
+            "join (select count(*) as cnt, room.type_id from room_reserved rr " +
+            "join room on room.id = rr.room_id " + 
+            "group by room.type_id) as T using (type_id) " + 
+            "where m.month = extract(month from NOW()) " +
+            "order by T.cnt asc;";
+        }
+        if(type == 'Spacing') {
+            query = "select name, description, link, image, price_each_day from type t " + 
+            "join month_price m on t.id = m.type_id " +
+            "where m.month = extract(month from NOW()) " +
+            "order by capacity asc;";
+        }
+        //console.log(query);
+        db.query(query, function(err, data){
+            if (err) throw err;
+            //console.log(data);
+            res.json(data);
+
+        });
+    }
 });
 
 router.post('/room_search', function(req, res) {
