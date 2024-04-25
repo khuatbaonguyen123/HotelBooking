@@ -36,6 +36,11 @@ router.get('/detail', (req, res) => {
     const { id } = req.query;
     //console.log(id);
     let link = `detail${id}.ejs`;
+    cli.zincrby('myzset', 1, `${id}`, (err, reply) => {
+        if (err) {
+          console.error('Error incrementing score:', err);
+        }
+    });
     res.render(link);
 })
 // router.get('/detail1', (req, res) => {

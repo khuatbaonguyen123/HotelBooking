@@ -3,8 +3,6 @@ const router = express.Router();
 
 const Rating = require('../model_mongodb/dbmongo.js');
 const db = require('../database');
-const cli = require('../connect_redis.js');
-
 
 router.post('/submit', async (req, res) => {
     const { rating } = req.body; 
@@ -26,7 +24,7 @@ router.post('/submit', async (req, res) => {
     if (results.length === 0) {
         // Trả về thông báo lỗi "Chưa đánh giá"
         console.log('Chưa thuê phòng');
-        return res.redirect('/Assignment_r');
+        return res.redirect(`/Assignment_r${id}`);
     }
     // Thực hiện hành động khi kết quả không rỗng
     try{
@@ -35,12 +33,12 @@ router.post('/submit', async (req, res) => {
           
             // const dateIn = results[i].date_in;
             const newRating = await Rating.create({ idRoom: Number(id), rating, idUser: userId});
-            res.redirect('/Assignment_s');
+            res.redirect(`/Assignment_s${id}`);
         }
     }
     catch {
         console.error('Đã đánh giá', err);
-        return res.redirect('/Assignment_db');
+        return res.redirect(`/Assignment_db${id}`);
     }
 });
 
@@ -51,14 +49,6 @@ router.get('/data', async (req, res) => {
     const {id} = req.query;
     console.log(id);
     try {
-        cli.zincrby('myzset', id, '1', (err, reply) => {
-            if (err) {
-              console.error('Error incrementing score:', err);
-            }
-          
-            //console.log('New score of member "room1":');
-            //cli.zscore('myzset', '1', (err, reply) => {console.log(reply);})
-        });
         const data = await Rating.aggregate([
             { $match: {idRoom: Number(id)} },
             { $group: { _id: '$rating', count: { $sum: 1 } } },
