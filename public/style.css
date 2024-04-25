@@ -403,7 +403,7 @@ table th, table td {
 }
 
 .hero {
-    background-image: url("images/hero1-bg.jpg");
+    background-image: linear-gradient(to right bottom, rgba(255, 255, 255, 0.149), rgba(0, 0, 0, 0.582)), url("images/hero1-bg.jpg");
     background-size: cover;
     background-position: center;
     height: calc(100vh - 7.5rem);
@@ -569,7 +569,7 @@ footer {
     color: var(--main-color);
     padding: 0;
     padding-bottom: 10rem;
-    /* background-color: #f9f9f9; */
+    /* background-color: #eaeaea; */
 }
 
 .row-2 {
