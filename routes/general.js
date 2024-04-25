@@ -153,14 +153,19 @@ async function getInfo(i) {
 }
   
 router.get('/rooms', async (req, res) => {
-    let mem = await getSort(req.session.userId);
-        //console.log(mem);
-        var data = [];
-        for(let i = 0; i < mem.length; i++) {
-            let dataRow = await getInfo(mem[i]);
-            data.push(dataRow[0]);
-        }
-        res.render('rooms.ejs', {data});
+    let userID = 0;
+    if (req.session.userID) {
+        userID = req.session.userID;
+    }
+    console.log(userID);
+    let mem = await getSort(userID);
+    //console.log(mem);
+    var data = [];
+    for(let i = 0; i < mem.length; i++) {
+        let dataRow = await getInfo(mem[i]);
+        data.push(dataRow[0]);
+    }
+    res.render('rooms.ejs', {data});
 })
 
 async function getRate(i) {
@@ -189,9 +194,10 @@ async function getRate(i) {
 router.get('/get_data', async (req, res) =>{
     var type = req.query.parent_value;
     if(type == 'Default') {
-        res.redirect('/roooms');
+        console.log("hu");
+        res.redirect('/rooms');
     }
-    if(type == 'Reviews') {
+    else if(type == 'Reviews') {
         let arr = new Array();
         db.query('SELECT count(*) as cnt FROM bookingapp.type;', async (err, result) => {
             let n = result[0].cnt;
@@ -224,11 +230,11 @@ router.get('/get_data', async (req, res) =>{
         if(type == 'Popularity') {
             query = "select id, name, description, link, image, price_each_day from type t " + 
             "join month_price m on t.id = m.type_id " +
-            "join (select count(*) as cnt, room.type_id from room_reserved rr " +
+            "left join (select count(*) as cnt, room.type_id from room_reserved rr " +
             "join room on room.id = rr.room_id " + 
             "group by room.type_id) as T using (type_id) " + 
             "where m.month = extract(month from NOW()) " +
-            "order by T.cnt asc;";
+            "order by T.cnt desc;";
         }
         if(type == 'Spacing') {
             query = "select id, name, description, link, image, price_each_day from type t " + 
@@ -236,7 +242,7 @@ router.get('/get_data', async (req, res) =>{
             "where m.month = extract(month from NOW()) " +
             "order by capacity asc;";
         }
-        //console.log(query);
+        console.log(query);
         db.query(query, function(err, data){
             if (err) throw err;
             // console.log(data);

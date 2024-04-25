@@ -79,10 +79,10 @@
                                 <p> <%= data[i].description%> </p>
                                 <p class="price"><span><%= data[i].price_each_day %></span> / night</p>
                                 <a href= "detail?id=<%= data[i].id %>">More Details</a>
-                                <% i++; %>
                             </div>
                         </div>
                     </div>
+                    <% i++; %>
                     <% if(i <data.length) { %>
                     <div class="col-2">
                         <div class="room-image">
