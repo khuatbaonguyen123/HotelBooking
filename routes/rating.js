@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const Rating = require('../model_mongodb/dbmongo.js');
-const db = require('../connect_redis.js');
+const db = require('../database');
 const cli = require('../connect_redis.js');
 let cnt = 0;
 
@@ -14,8 +14,8 @@ router.post('/submit', async (req, res) => {
         return res.status(400).json({ error: 'Rating is a required field.' });
     }
 
-    const dbquery = "SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = ? AND re.status = ?;";
-    db.query(dbquery, [req.session.userId], 1, 'checkout', async (err, results) => {
+    const dbquery = "SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = 1 AND re.status =  'checkout';";
+    db.query(dbquery, [req.session.userId], async (err, results) => {
     if (err) {
         // Xử lý lỗi
         console.error('Error querying database:', err);
