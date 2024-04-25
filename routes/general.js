@@ -5,6 +5,7 @@ const db=require('../database');
 const bcrypt=require('bcrypt');
 const { route } = require('./users');
 const cli = require('../connect_redis.js');
+const Rating = require('../model_mongodb/dbmongo.js');
 const { isModuleNamespaceObject } = require('util/types');
 
 router.get('/',(req,res)=>{
@@ -31,24 +32,30 @@ router.get('/restaurant', (req, res) => {
 router.get('/spa', (req, res) => {
     res.render('spa.ejs');
 })
-router.get('/detail1', (req, res) => {
-    res.render('detail1.ejs');
+router.get('/detail', (req, res) => {
+    const { id } = req.query;
+    //console.log(id);
+    let link = `detail${id}.ejs`;
+    res.render(link);
 })
-router.get('/detail2', (req, res) => {
-    res.render('detail2.ejs');
-})
-router.get('/detail3', (req, res) => {
-    res.render('detail3.ejs');
-})
-router.get('/detail4', (req, res) => {
-    res.render('detail4.ejs');
-})
-router.get('/detail5', (req, res) => {
-    res.render('detail5.ejs');
-})
-router.get('/detail6', (req, res) => {
-    res.render('detail6.ejs');
-})
+// router.get('/detail1', (req, res) => {
+//     res.render('detail1.ejs');
+// })
+// router.get('/detail2', (req, res) => {
+//     res.render('detail2.ejs');
+// })
+// router.get('/detail3', (req, res) => {
+//     res.render('detail3.ejs');
+// })
+// router.get('/detail4', (req, res) => {
+//     res.render('detail4.ejs');
+// })
+// router.get('/detail5', (req, res) => {
+//     res.render('detail5.ejs');
+// })
+// router.get('/detail6', (req, res) => {
+//     res.render('detail6.ejs');
+// })
 router.get('/Assignment_r', (req, res) => {
     res.render('Assignment_r.ejs');
 })
@@ -138,7 +145,7 @@ async function getSort() {
 
 async function getInfo(i) {
     return new Promise(async (resolve, reject) => {
-        db.query(`select name, description, link, image, price_each_day from type t 
+        db.query(`select id, name, description, link, image, price_each_day from type t 
                     join month_price m on t.id = m.type_id 
                     where m.month = extract(month from NOW()) and id =  ${i};`, 
                     (err, result) => {
@@ -153,7 +160,7 @@ async function getInfo(i) {
   
 router.get('/rooms', async (req, res) => {
     let mem = await getSort();
-        console.log(mem);
+        //console.log(mem);
         var data = [];
         for(let i = 0; i < mem.length; i++) {
             let dataRow = await getInfo(mem[i]);
@@ -162,28 +169,66 @@ router.get('/rooms', async (req, res) => {
         res.render('rooms.ejs', {data});
 })
 
+async function getRate(i) {
+    let data = await Rating.aggregate([
+        { $match: {idRoom: Number(i)} },
+        { $group: { _id: '$rating', count: { $sum: 1 } } },
+        { $project: { _id: 0, stars: '$_id', count: 1 } }
+    ]);
+    if(data.length == 0) {
+        return([0, i]); 
+    }
+    else {
+        let total_rating = 0;
+        rating_based_on_stars = 0
+        //console.log(data);
+        data.forEach((rate,index) => {
+            total_rating += rate.count;
+            rating_based_on_stars += rate.count * rate.stars;
+        })
+        let rating_average = (rating_based_on_stars/total_rating).toFixed(1);
+        //console.log(rating_average);
+        return([Number(rating_average), i]);
+    }
+}
+
 router.get('/get_data', async (req, res) =>{
     var type = req.query.parent_value;
     if(type == 'Default') {
-        let mem = await getSort();
-        console.log(mem);
-        var data = [];
-        for(let i = 0; i < mem.length; i++) {
-            let dataRow = await getInfo(mem[i]);
-            data.push(dataRow[0]);
-        }
-        res.json(data);
+        res.redirect('/roooms');
+    }
+    if(type == 'Reviews') {
+        let arr = new Array();
+        db.query('SELECT count(*) as cnt FROM bookingapp.type;', async (err, result) => {
+            let n = result[0].cnt;
+            //console.log(result[0].cnt);
+            for(let i = 0; i < n; i++) {
+                //console.log(await getRate(i));
+                arr.push(await getRate(i));
+            }
+            arr.sort();
+            //console.log(arr);
+            let data = new Array();
+            for(let i = arr.length - 1; i > 0; i--) {
+                //console.log(arr[i][1]);
+                let dataRow = await getInfo(arr[i][1]);
+                data.push(dataRow[0]);
+            }
+            //console.log(data);
+            res.render('rooms.ejs', {data});
+        })
+
     }
     else {
         var query = "";
         if(type == 'Price') {
-            query = "select name, description, link, image, price_each_day from type t " + 
+            query = "select id, name, description, link, image, price_each_day from type t " + 
             "join month_price m on t.id = m.type_id " +
             "where m.month = extract(month from NOW()) " +
             "order by price_each_day asc;";
         }
         if(type == 'Popularity') {
-            query = "select name, description, link, image, price_each_day from type t " + 
+            query = "select id, name, description, link, image, price_each_day from type t " + 
             "join month_price m on t.id = m.type_id " +
             "join (select count(*) as cnt, room.type_id from room_reserved rr " +
             "join room on room.id = rr.room_id " + 
@@ -192,7 +237,7 @@ router.get('/get_data', async (req, res) =>{
             "order by T.cnt asc;";
         }
         if(type == 'Spacing') {
-            query = "select name, description, link, image, price_each_day from type t " + 
+            query = "select id, name, description, link, image, price_each_day from type t " + 
             "join month_price m on t.id = m.type_id " +
             "where m.month = extract(month from NOW()) " +
             "order by capacity asc;";
@@ -200,7 +245,8 @@ router.get('/get_data', async (req, res) =>{
         //console.log(query);
         db.query(query, function(err, data){
             if (err) throw err;
-            //console.log(data);
+            console.log(data);
+            console.log(data.length);
             res.json(data);
 
         });
@@ -209,7 +255,7 @@ router.get('/get_data', async (req, res) =>{
 
 router.post('/room_search', function(req, res) {
     const { search } = req.body;
-    const query = `select distinct name, description, link, image, price_each_day from type t
+    const query = `select distinct id, name, description, link, image, price_each_day from type t
                   join month_price m on t.id = m.type_id
                   where m.month = extract(month from NOW()) and
                   match(description) against('${search}');`;
