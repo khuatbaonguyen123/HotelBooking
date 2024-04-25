@@ -93,7 +93,7 @@
             <div class = "use_rating">Rating the room</div>
         </div>
         <div class="wrapper">
-            <form method="POST" action = "/submit">
+            <form method="POST" action = "/submit?id=1">
                 <div class="rating">
                     <input type="number" name="rating" hidden>
                     <i class='bx bx-star star' style="--i: 0;"></i>
@@ -299,7 +299,7 @@
     })
 
 
-    fetch('/data')
+    fetch('/data?id=1')
   .then(response => response.json())
   .then(data => {
     let total_rating = 0;

@@ -15,7 +15,15 @@ const chatRouter = require("./routes/chatting");
 
 const chatDemo = require("./routes/chatdemo");
 
-const ratingRouter = require("./routes/rating");
+const ratingRouter = require('./routes/rating');
+
+
+const ratingRouter2 = require('./routes/rating2');
+const ratingRouter3 = require('./routes/rating3');
+const ratingRouter4 = require('./routes/rating4');
+const ratingRouter5 = require('./routes/rating5');
+const ratingRouter6 = require('./routes/rating6');
+
 
 const app = express();
 

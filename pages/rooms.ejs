@@ -78,7 +78,7 @@
                                 <h4> <%= data[i].name %> ROOM</h4>
                                 <p> <%= data[i].description%> </p>
                                 <p class="price"><span><%= data[i].price_each_day %></span> / night</p>
-                                <a href=<%= data[i].link %>>More Details</a>
+                                <a href= "detail?id=<%= data[i].id %>">More Details</a>
                                 <% i++; %>
                             </div>
                         </div>
@@ -94,7 +94,7 @@
                                     <h4> <%= data[i].name %> ROOM</h4>
                                     <p> <%= data[i].description%> </p>
                                     <p class="price"><span><%= data[i].price_each_day %></span> / night</p>
-                                    <a href=<%= data[i].link %>>More Details</a>
+                                    <a href= "detail?id=<%= data[i].id %>">More Details</a>
                                 </div>
                             </div>
                         </div>
@@ -202,13 +202,13 @@ function fetch_data(parent_element, child_element)
                                         <h4>` + data[i].name + ` ROOM</h4>
                                         <p>` + data[i].description + `</p>
                                         <p class="price"><span>` + data[i].price_each_day + `</span> / night</p>
-                                        <a href=` + data[i].link + `>More Details</a>
+                                        <a href= detail?id=` + data[i].id + `>More Details</a>
                                     </div>
                                 </div>
                             </div>`;
                             i++;
-
-                html +=     `<div class="col-2">
+                if(i < data.length)
+                    html +=`<div class="col-2">
                             <div class="room-image">
                                 <img src=` + data[i].image + ` alt="room">
                             </div>
@@ -218,7 +218,7 @@ function fetch_data(parent_element, child_element)
                                         <h4>` + data[i].name + ` ROOM</h4>
                                         <p>` + data[i].description + `</p>
                                         <p class="price"><span>` + data[i].price_each_day + `</span> / night</p>
-                                        <a href=` + data[i].link + `>More Details</a>
+                                        <a href= detail?id=` + data[i].id + `>More Details</a>
                                     </div>
                                 </div>
                             </div>
