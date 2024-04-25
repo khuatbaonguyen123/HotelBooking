@@ -33,7 +33,6 @@ router.post('/submit', async (req, res) => {
           
             // const dateIn = results[i].date_in;
             const newRating = await Rating.create({ idRoom: Number(id), rating, idUser: userId});
-            console.log(`/Assignment_s${id}`);
             res.redirect(`/Assignment_s${id}`);
         }
     }

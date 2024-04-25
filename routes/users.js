@@ -3,6 +3,8 @@ const router = express.Router();
 const db=require('../database');
 const bcrypt=require('bcrypt');
 const puppeteer = require('puppeteer');
+const cli = require('../connect_redis.js');
+
 function isLoggedOut(req,res,next){
     if (req.session.userId)
         res.redirect('/booking');
@@ -99,7 +101,7 @@ router.post('/signup', async (req,res)=>{
                                                     throw err;
                                                 });
                                             }
-                                            res.redirect('/index');
+                                            res.redirect('/init_redis');
                                         });
                                     });
                                 });
@@ -120,6 +122,18 @@ router.post('/signup', async (req,res)=>{
         return res.status(400).json({ error: 'First name not valid.' });
     }
 })
+
+router.get('/init_redis', (req,res) =>{
+    db.query(`SELECT count(*) as cnt FROM bookingapp.booker;`, (err, result) => {
+        cli.zadd(`myzset${result[0].cnt + 1}`, 0, '1', 0, '2', 0, '3', 0, '4', 0, '5', 0, '6', (err, reply) => {
+            if (err) {
+            console.error('Error incrementing score:', err);
+            }
+            console.log(`myzset${result[0].cnt + 1}`);
+        });
+    });
+    res.redirect('/index');
+});
 
 router.post('/signin', async (req, res) => {
     const { email, password } = req.body;

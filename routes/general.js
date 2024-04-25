@@ -36,7 +36,7 @@ router.get('/detail', (req, res) => {
     const { id } = req.query;
     //console.log(id);
     let link = `detail${id}.ejs`;
-    cli.zincrby('myzset', 1, `${id}`, (err, reply) => {
+    cli.zincrby(`myzset${req.session.userId}`, 1, `${id}`, (err, reply) => {
         if (err) {
           console.error('Error incrementing score:', err);
         }
@@ -125,9 +125,9 @@ router.get('/Assignment_s6', (req, res) => {
     res.render('Assignment_s6.ejs');
 })
 
-async function getSort() {
+async function getSort(userId) {
     return new Promise((resolve, reject) => {
-      cli.zrevrange('myzset', 0, -1, (err, members) => {
+      cli.zrevrange(`myzset${userId}`, 0, -1, (err, members) => {
         if (err) {
           reject(err);
           return;
@@ -153,7 +153,7 @@ async function getInfo(i) {
 }
   
 router.get('/rooms', async (req, res) => {
-    let mem = await getSort();
+    let mem = await getSort(req.session.userId);
         //console.log(mem);
         var data = [];
         for(let i = 0; i < mem.length; i++) {
@@ -239,8 +239,8 @@ router.get('/get_data', async (req, res) =>{
         //console.log(query);
         db.query(query, function(err, data){
             if (err) throw err;
-            console.log(data);
-            console.log(data.length);
+            // console.log(data);
+            // console.log(data.length);
             res.json(data);
 
         });
@@ -254,7 +254,7 @@ router.post('/room_search', function(req, res) {
                   where m.month = extract(month from NOW()) and
                   match(description) against('${search}');`;
     db.query(query, (err, data) => {
-        console.log(data);
+        //console.log(data);
         if (err) throw err;
         else
             res.render('rooms.ejs', {data});
