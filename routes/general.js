@@ -61,26 +61,15 @@ router.get('/detail', (req, res) => {
 // router.get('/detail6', (req, res) => {
 //     res.render('detail6.ejs');
 // })
-router.get('/Assignment_r', (req, res) => {
-    res.render('Assignment_r.ejs');
+router.get('/Assignment_r1', (req, res) => {
+    res.render('Assignment_r1.ejs');
 })
-router.get('/Assignment_db', (req, res) => {
-    res.render('Assignment_db.ejs');
+router.get('/Assignment_db1', (req, res) => {
+    res.render('Assignment_db1.ejs');
 })
-router.get('/Assignment_s', (req, res) => {
-    res.render('Assignment_s.ejs');
+router.get('/Assignment_s1', (req, res) => {
+    res.render('Assignment_s1.ejs');
 })
-
-router.get('/Assignment_r', (req, res) => {
-    res.render('Assignment_r.ejs');
-})
-router.get('/Assignment_db', (req, res) => {
-    res.render('Assignment_db.ejs');
-})
-router.get('/Assignment_s', (req, res) => {
-    res.render('Assignment_s.ejs');
-})
-
 
 router.get('/Assignment_r2', (req, res) => {
     res.render('Assignment_r2.ejs');

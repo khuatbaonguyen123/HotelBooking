@@ -13,14 +13,14 @@ router.post('/submit', async (req, res) => {
         return res.status(400).json({ error: 'Rating is a required field.' });
     }
 
-    const dbquery = "SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = 1 AND re.status =  'checkout';";
+    const dbquery = `SELECT DISTINCT booker_id FROM reservation re JOIN room_reserved rr ON rr.reservation_id = re.id JOIN room r ON r.id = rr.room_id WHERE re.booker_id = ? AND r.type_id = ${id} AND re.status =  'checkout';`;
     db.query(dbquery, [req.session.userId], async (err, results) => {
     if (err) {
         // Xử lý lỗi
         console.error('Error querying database:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
-
+    console.log(results.length);
     if (results.length === 0) {
         // Trả về thông báo lỗi "Chưa đánh giá"
         console.log('Chưa thuê phòng');
@@ -33,6 +33,7 @@ router.post('/submit', async (req, res) => {
           
             // const dateIn = results[i].date_in;
             const newRating = await Rating.create({ idRoom: Number(id), rating, idUser: userId});
+            console.log(`/Assignment_s${id}`);
             res.redirect(`/Assignment_s${id}`);
         }
     }
