@@ -482,6 +482,9 @@ body {
     border-radius: 6px;
     line-height: 1.5;
     margin-left: 32px;
+    word-wrap: break-word; 
+    overflow-wrap: break-word;
+
 }
 .conversation-item.me .conversation-item-text {
     margin-left: unset;
