@@ -154,8 +154,8 @@ async function getInfo(i) {
   
 router.get('/rooms', async (req, res) => {
     let userID = 0;
-    if (req.session.userID) {
-        userID = req.session.userID;
+    if (req.session.userId) {
+        userID = req.session.userId;
     }
     console.log(userID);
     let mem = await getSort(userID);

@@ -88,6 +88,25 @@ app.get('/set-session', (req, res) => {
   res.send('Set OK');
 })
 
+app.get('/create_data_redis', (req,res) =>{
+  console.log(req.session.userId);
+  let userID = 0;
+  if (req.session.userId) {
+    userID = req.session.userId;
+  }
+  clientRedis.exists(`myzset${userID}`, (err, result) => {
+    if (result) {
+      res.send(`myzset${userID} is exists` );
+    } else {
+      clientRedis.zadd(`myzset${userID}`, 0, '1', 0, '2', 0, '3', 0, '4', 0, '5', 0, '6', (err, reply) => {
+          if (err) {
+          console.error('Error incrementing score:', err);
+          }
+      });
+      res.send(`init myzset${userID}` );
+    }
+  });
+});
 
 app.listen(process.env.PORT, () => {
   console.log(`Example app listening on port ${process.env.PORT}`)
