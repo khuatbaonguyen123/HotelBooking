@@ -132,7 +132,7 @@ router.get('/init_redis', (req,res) =>{
             console.log(`myzset${result[0].cnt + 1}`);
         });
     });
-    res.redirect('/index');
+    res.redirect('/loginform');
 });
 
 router.post('/signin', async (req, res) => {
