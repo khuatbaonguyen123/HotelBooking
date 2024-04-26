@@ -765,6 +765,7 @@ footer {
     padding: 1.7rem 1.5rem;
     font-family: var(--main-font-2);
     font-size: 1.8rem;
+    color: var(--white-color);
     margin-bottom: 3rem;
     transition: all .5s;
 }
