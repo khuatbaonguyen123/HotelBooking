@@ -137,6 +137,8 @@
     const socket = io(`http://${IP}:${PORT}`);
 
     socket.on("server_send_message", (msg) => {
+        const currentChatUserId = $("#user_id").val();
+    if (msg.user_id === currentChatUserId) {
       const messageClass = (msg?.user_name === "admin@test.com") ? "" : "me";
 
       const defaultCreatedAt = new Date(); // Current time
@@ -178,6 +180,7 @@
         `;
         $(".conversation-wrapper").append(newConversationItem);
         $(".conversation-main").scrollTop($(".conversation-main").prop("scrollHeight"));
+                        }
     });
 
     const input = $("#message-input");
@@ -264,6 +267,8 @@
             const chatId = adminId + "to" + selectedUserId;
             console.log("Selected chatId:", chatId);
             document.getElementById('user_id').value = chatId;
+            const newUrl = window.location.href.split('?')[0] + `?chatId=${chatId}`;
+            window.history.pushState({ path: newUrl }, '', newUrl);
              $.ajax({
                 url: `http://${IP}:${PORT}/messages/search?user_id=${chatId}`,
                 type: "GET", 
