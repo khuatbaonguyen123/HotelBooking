@@ -48,39 +48,35 @@
 
     <section class="contact" align="center">
         <div class="container">
-            <div class="row">
-                <div class="col-2">
-                    <img src="https://img.icons8.com/bubbles/100/000000/user.png" class="img-radius" style = "position:relative; left:290px;" alt="User-Profile-Image">
-                    <div style = "position:relative; left:290px;">
-                        <h3>First name</h3>
-                        <p><%= userData.first_name%></p> <!-- insert data here -->
-                    </div>
-                    <div style = "position:relative; left:290px;">
-                        <h3>Last name</h3>
-                        <p><%= userData.last_name%></p>
-                    </div>
-                    <div style = "position:relative; left:290px;">
-                        <h3>Email</h3>
-                        <p><%= userData.email%></p>
-                    </div>
-                    <div style = "position:relative; left:290px;">
-                        <h3>Date of birth</h3>
-                        <% function dateFormatting(dateType){
-                            let date = dateType.getDate();
-                            let month = dateType.getMonth()+1;
-                            let year= dateType.getFullYear();
-                            const dateFormat = [(date>9 ? '' : '0') + date,(month>9 ? '' : '0') + month,year].join('/');
-                            return dateFormat;
-                        } %>
-                        <p><%= dateFormatting(userData.birth_date) %></p>
-                    </div>
-                    <div style = "position:relative; left:290px;">
-                        <h3>Phone</h3>
-                        <p><%= userData.phone%></p>
-                    </div>
-                </div>
-            </div>
             <div class="col-2">
+                <img src="https://img.icons8.com/bubbles/100/000000/user.png" class="img-radius"  alt="User-Profile-Image">
+                <div >
+                    <h3>First name</h3>
+                    <p><%= userData.first_name%></p> <!-- insert data here -->
+                </div>
+                <div >
+                    <h3>Last name</h3>
+                    <p><%= userData.last_name%></p>
+                </div>
+                <div >
+                    <h3>Email</h3>
+                    <p><%= userData.email%></p>
+                </div>
+                <div >
+                    <h3>Date of birth</h3>
+                    <% function dateFormatting(dateType){
+                        let date = dateType.getDate();
+                        let month = dateType.getMonth()+1;
+                        let year= dateType.getFullYear();
+                        const dateFormat = [(date>9 ? '' : '0') + date,(month>9 ? '' : '0') + month,year].join('/');
+                        return dateFormat;
+                    } %>
+                    <p><%= dateFormatting(userData.birth_date) %></p>
+                </div>
+                <div >
+                    <h3>Phone</h3>
+                    <p><%= userData.phone%></p>
+                </div>
                 <h3>Booking History</h3>
                 <br><br>
                 <table>
