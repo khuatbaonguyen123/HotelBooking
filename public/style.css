@@ -870,7 +870,7 @@ textarea {
 
   .alert-success {
     background-color: var(--main-color);
-    color: #8a6e52;
+    color: var(--white-pinkish-color);
     border: 1px solid var(--main-color);
     padding: 15px;
     margin-bottom: 20px;

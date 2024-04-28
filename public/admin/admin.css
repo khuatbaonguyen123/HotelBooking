@@ -715,9 +715,9 @@ float: right;
   }
 
   .alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: var(--main-color);
+    color: var(--white-pinkish-color);
+    border: 1px solid var(--main-color);
     padding: 15px;
     margin-bottom: 20px;
     font-size: 2rem;
