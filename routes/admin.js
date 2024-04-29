@@ -346,7 +346,8 @@ router.post("/admin/roomlist", isLoggedInAdmin, (req, res) => {
   const { id } = req.query;
   console.log(id);
   db.query(
-    `select id, number, status, booker
+    `select id, number, status, 
+      if(status = 'available', null, booker) as booker
       from vroomlist
       where type_id =${id}`,
     (err, data) => {

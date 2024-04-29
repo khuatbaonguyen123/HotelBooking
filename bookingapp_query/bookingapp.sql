@@ -195,7 +195,7 @@ where b.id = re.booker_id and re.id=p.reservation_id and r.reservation_id = re.i
     
 create view vroomlist as
 select room.id, room.number, room.type_id, 
-	   if(r.status is null, "available", r.status) as status, 
+	   if(r.status is null or r.status = "checkout", "available", r.status) as status, 
        if(first_name is null, '', concat(last_name, ' ', first_name)) as booker
 from room
 left join room_reserved rr on room.id = rr.room_id
