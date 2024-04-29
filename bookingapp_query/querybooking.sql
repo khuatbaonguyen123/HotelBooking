@@ -48,35 +48,23 @@ DELIMITER ;
 -- TRIGGER
 
 -- trigger tu dong cap nhat khi da toi ngay nhan phong ma khach chua check in - tu dong huy
-DELIMITER //
+CREATE EVENT decline_passed_check_in
+ON SCHEDULE EVERY 1 DAY
+DO
+    UPDATE reservation
+    SET status = 'decline'
+    WHERE status = 'accept' AND date_in < curdate();
 
-CREATE TRIGGER cancel_past_due_reservation
-AFTER UPDATE ON reservation
-FOR EACH ROW
-BEGIN
-	UPDATE reservation
-    SET status = 'decline' 
-    WHERE OLD.status = 'accept' AND OLD.date_in < CURDATE();
-END //
-
-DELIMITER ;
-
--- trigger khi khach tu dat phong hom nay ma den mai chua duyet tu dong huy
+-- event khi khach tu dat phong hom nay ma den mai chua duyet tu dong huy
 ALTER TABLE reservation 
 ADD COLUMN created_date DATE;
 
-DELIMITER //
-
-CREATE TRIGGER cancel_unapproved_reservation
-AFTER UPDATE ON reservation
-FOR EACH ROW
-BEGIN
-	UPDATE reservation
+CREATE EVENT update_status_event
+ON SCHEDULE EVERY 1 DAY
+DO
+    UPDATE reservation
     SET status = 'decline'
-    WHERE old.status = 'pending' AND old.created_date < CURDATE();
-END //
-
-DELIMITER ;
+    WHERE status = 'pending' AND created_date < curdate();
 
 -- View 
 
