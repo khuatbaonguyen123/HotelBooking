@@ -62,32 +62,8 @@ a {
     margin: 15px 0;
     cursor: pointer;
 }
+  
 
-button {
-    border-radius: 20px;
-    border: 1px solid #c29c76;
-    background-color: #c29c76;
-    color: #FFFFFF;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 12px 45px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: transform 80ms ease-in;
-}
-
-button:active {
-    transform: scale(0.95);
-}
-
-button:focus {
-    outline: none;
-}
-
-button.ghost {
-    background-color: transparent;
-    border-color: #FFFFFF;
-}
 
 form {
     background-color: #FFFFFF;
@@ -246,3 +222,39 @@ input {
     padding: 15px;
     font-size: 1.2rem;
   }
+
+  .btn-hover {
+    width: 200px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    margin: 20px;
+    height: 55px;
+    text-align:center;
+    border: none;
+    background-size: 300% 100%;
+
+    border-radius: 50px;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+}
+
+.btn-hover:hover {
+    background-position: 100% 0;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+}
+
+.btn-hover:focus {
+    outline: none;
+}
+
+  .btn-hover.color-8 {
+    background-image: linear-gradient(to right, #222222, #4f4d49, #b3997f, #c29c76);
+    box-shadow: 0 4px 15px 0 rgba(45, 54, 65, 0.75);
+}
