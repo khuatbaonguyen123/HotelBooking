@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database');
 const slaveConnection = require('../database');
+const {set, incr, expire, ttl} = require('./limiter.js');
 
 /**
  * It returns an array of room numbers of a given room type.
@@ -21,7 +22,30 @@ function isLoggedIn(req,res,next)
         next();
     else res.redirect('/loginform');
 }
-router.get('/booking', isLoggedIn, (req, res) => {
+
+async function limitRequest (req, res, next){
+    const getIPUser = req.header['x-forwarded-for'] || req.connection.remoteAddress;
+    let _ttl = await ttl(getIPUser);
+    if(_ttl <= 0) {
+        await set(getIPUser);
+        await expire(getIPUser, 2);
+        _ttl = 2;
+    }
+    let numberRequest = await incr(getIPUser);
+    if(numberRequest > 3) {
+        // return res.status(503).json({
+        //     status: 'error',
+        //     _ttl,
+        //     message: 'Server is busy!',
+        //     numberRequest
+        // })
+        res.render("503_error.ejs");
+    } else {
+        next();
+    }
+}
+
+router.get('/booking', isLoggedIn, limitRequest, async (req, res) => {
     res.render('booking.ejs',{messages: req.flash('errors')});
 }) //must log in to see
 
