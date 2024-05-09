@@ -10,3 +10,6 @@ ALTER TABLE booker
 ADD COLUMN email varchar(255) not null,
 ADD COLUMN password varchar(255) not null;
 
+insert into admin(email,password)
+values ('admin@test.com','admin');
+
