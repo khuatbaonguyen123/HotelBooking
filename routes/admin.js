@@ -154,17 +154,20 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
         user_id: adminResult[0].id, // Add user_id here
         email: adminResult[0].email,
       };
-      const userIdsQuery = "SELECT id FROM booker";
+      const userIdsQuery = "SELECT id,last_name FROM booker";
       db.query(userIdsQuery, (err, userResults) => {
         if (err) {
           console.error("Error fetching user IDs:", err);
           throw err;
         } else {
-          const userIds = userResults.map((user) => user.id);
+          const users = userResults.map(user => ({
+            id: user.id,
+            last_name: user.last_name
+          }));
 
           res.render("adminChat.ejs", {
             user: adminData,
-            userIds: userIds
+            users: users,
           });
         }
       });

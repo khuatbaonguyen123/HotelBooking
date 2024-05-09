@@ -13,7 +13,7 @@ function isLoggedIn(req, res, next) {
 
 router.get("/chat", isLoggedIn, (req, res) => {
     console.log(req.session.userId);
-    const query = `SELECT id, email FROM booker WHERE id = ${req.session.userId};`;
+    const query = `SELECT id, email,last_name FROM booker WHERE id = ${req.session.userId};`;
     console.log("Executing DB Query:", query); 
     db.query(query, (err, result) => {
       if (err) {
@@ -24,7 +24,7 @@ router.get("/chat", isLoggedIn, (req, res) => {
         res.render("chat.ejs", {
           user: {
             user_id:result[0].id,
-            email: result[0].email,
+            email: result[0].last_name,
           },
         });
       }
