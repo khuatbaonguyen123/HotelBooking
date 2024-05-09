@@ -3,11 +3,20 @@ use bookingapp;
 -- TABLES
 
 -- we do not concern about the info of admin so we don't need admin table 
-CREATE TABLE account (
+CREATE TABLE admin (
   id int AUTO_INCREMENT primary key,
   email varchar(255) not null,
-  password varchar(255) not null,
-  type_of_account ENUM ('booker', 'admin') default 'booker' -- the admin account is only can be created in the sql server;
+  password varchar(255) not null
+);
+
+CREATE TABLE booker (
+	id int AUTO_INCREMENT primary key,
+	email varchar(255) not null,
+	password varchar(255) not null,
+    first_name varchar(50) not null,
+	last_name varchar(50) not null,
+	birth_date date,
+	phone char(10) not null
 );
 
 CREATE TABLE rating (
@@ -62,15 +71,6 @@ CREATE TABLE room (
   CONSTRAINT FK_TypeID FOREIGN KEY (type_id) references type(id)
 );
 
-CREATE TABLE booker (
-  id int, -- the id is referencing to id in account
-  first_name varchar(50) not null,
-  last_name varchar(50) not null,
-  birth_date date,
-  phone char(10) not null,
-  PRIMARY KEY (id),
-  CONSTRAINT FK_BookerID FOREIGN KEY (id) references account(id)
-);
 CREATE TABLE reservation (
   id int PRIMARY KEY auto_increment,
   date_in date,
@@ -120,7 +120,7 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 -- INDEXS
 
-create index email_idx on account(email);
+create index email_idx on booker(email);
 -- for further improvement of app we can add some other index to improve running speed
 
 -- SOME EVENT OR TRIGGER OR PROCEDURE OR FUNCTION
@@ -364,5 +364,5 @@ values
 (5,12,2024,400),
 (6,12,2024,350);
 
-insert into account(email,password,type_of_account)
-values ('admin@test.com','admin','admin');
+insert into admin(email,password)
+values ('admin@test.com','admin');
