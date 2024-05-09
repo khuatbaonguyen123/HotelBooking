@@ -32,7 +32,7 @@ router.post("/admin/login", (req, res) => {
     res.status(404).json({ message: "Please enter all fields" });
   else {
     db.query(
-      `select * from account where email='${email}' and type_of_account = 'admin'`,
+      `select * from admin where email='${email}'`,
       (err, results) => {
         if (err) throw err;
         if (results.length > 0) {
@@ -143,7 +143,7 @@ router.get("/admin/reservation", isLoggedInAdmin, (req, res) => {
 });
 //chat
 router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
-  const adminQuery = `SELECT id, email FROM account WHERE id = ${req.session.adminID};`;
+  const adminQuery = `SELECT id, email FROM admin WHERE id = ${req.session.adminID};`;
   db.query(adminQuery, (err, adminResult) => {
     if (err) {
       console.error("Error fetching admin details:", err);
@@ -153,7 +153,7 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
         user_id: adminResult[0].id, // Add user_id here
         email: adminResult[0].email,
       };
-      const userIdsQuery = "SELECT id FROM account";
+      const userIdsQuery = "SELECT id FROM booker";
       db.query(userIdsQuery, (err, userResults) => {
         if (err) {
           console.error("Error fetching user IDs:", err);

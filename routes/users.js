@@ -50,9 +50,9 @@ async function getCheckLink(Input) {
     }
 }
 
-router.post('/signup', async (req,res)=>{
-    const {fname, lname, email,password} = req.body;
-    let hashedPassword= await bcrypt.hash(password,10);
+router.post('/signup', async (req, res) => {
+    const { fname, lname, email, password, phone, dob } = req.body;
+    let hashedPassword = await bcrypt.hash(password, 10);
     let checkfName = await getCheckLink(fname);
     console.log("fname:" + checkfName);
     if (checkfName === "Not Link" || checkfName === "Safe") {
@@ -61,10 +61,10 @@ router.post('/signup', async (req,res)=>{
         if (checklName === "Not Link" || checklName === "Safe") {
             let checkPassword = await getCheckLink(password);
             console.log(checkPassword);
-            if ((checkPassword === "Not Link" || checkPassword === "Safe") ) {
+            if ((checkPassword === "Not Link" || checkPassword === "Safe")) {
                 db.beginTransaction((err) => {
                     if (err) throw err;
-                    db.query(`SELECT * FROM account WHERE email='${email}'`, (err, results) => {
+                    db.query(`SELECT * FROM booker WHERE email='${email}'`, (err, results) => {
                         if (err) {
                             db.rollback(() => {
                                 throw err;
@@ -75,35 +75,19 @@ router.post('/signup', async (req,res)=>{
                             res.redirect('/signupform');
                             db.rollback();
                         } else {
-                            db.query(`INSERT INTO account (email,password) VALUES ('${email}','${hashedPassword}')`, (err) => {
+                            db.query(`INSERT INTO booker (email, password, first_name, last_name, phone, birth_date) VALUES ('${email}', '${hashedPassword}', '${fname}', '${lname}', '${phone}', '${dob}')`, (err) => {
                                 if (err) {
                                     db.rollback(() => {
                                         throw err;
                                     });
                                 }
-                                const { fname, lname, phone, dob } = req.body;
-                                db.query(`SELECT id FROM account WHERE email='${email}'`, (err, results) => {
+                                db.commit((err) => {
                                     if (err) {
                                         db.rollback(() => {
                                             throw err;
                                         });
                                     }
-                                    const id = results[0].id;
-                                    db.query(`INSERT INTO booker VALUES (${id},'${fname}','${lname}','${dob}','${phone}')`, (err) => {
-                                        if (err) {
-                                            db.rollback(() => {
-                                                throw err;
-                                            });
-                                        }
-                                        db.commit((err) => {
-                                            if (err) {
-                                                db.rollback(() => {
-                                                    throw err;
-                                                });
-                                            }
-                                            res.redirect('/init_redis');
-                                        });
-                                    });
+                                    res.redirect('/init_redis');
                                 });
                             });
                         }
@@ -122,6 +106,7 @@ router.post('/signup', async (req,res)=>{
         return res.status(400).json({ error: 'First name not valid.' });
     }
 })
+
 
 router.get('/init_redis', (req,res) =>{
     db.query(`SELECT count(*) as cnt FROM bookingapp.booker;`, (err, result) => {
@@ -144,7 +129,7 @@ router.post('/signin', async (req, res) => {
     let checkPassword = await getCheckLink(password);
     console.log(checkPassword);
     if ((checkPassword === "Not Link" || checkPassword === "Safe")) {
-        db.query(`SELECT * FROM account WHERE email='${email}' AND type_of_account = 'booker'`, (err, results) => {
+        db.query(`SELECT * FROM booker WHERE email='${email}'`, (err, results) => {
             if (err) throw err;
             if (results.length > 0) {
                 const user = results[0];
@@ -171,8 +156,8 @@ router.post('/signin', async (req, res) => {
 
 router.get('/profile', isLoggedIn, (req, res) => {
     db.query(`select * 
-              from account join booker on account.id=booker.id 
-              where account.id=${req.session.userId}`, (err,results)=>{
+              from booker 
+              where booker.id=${req.session.userId}`, (err,results)=>{
                 if (err) throw err;
                 const userData=results[0];
                 db.query(`select b.reservation_id,date_in,date_out,number,a.status
@@ -217,8 +202,8 @@ router.get('/editProfile', isLoggedIn, (req, res) => {
         if (Number(id)===req.session.userId)  //user can only edit their own profile 
         {
             db.query(`select * 
-                    from account join booker on account.id=booker.id 
-                    where account.id=${id}`,(err,results)=>{
+                    from booker 
+                    where booker.id=${id}`,(err,results)=>{
                         if (err) throw err;
                         const userData=results[0];
                         if (userData){    //user exists in database
@@ -246,7 +231,7 @@ router.post('/editProfile',isLoggedIn, async(req,res)=>{
         let checklName = await getCheckLink(lname);
         console.log("lname:" + checklName);
         if (checklName === "Not Link" || checklName === "Safe") {
-            db.query(`select * from account where email='${email}' and id<>${id}`,(err,results)=>{
+            db.query(`select * from booker where email='${email}' and id<>${id}`,(err,results)=>{
                 if (err) throw err;
                 if (results.length>0) //duplicated email
                 {
@@ -254,10 +239,10 @@ router.post('/editProfile',isLoggedIn, async(req,res)=>{
                     req.flash('error','Email already registered');
                     res.redirect(`/editProfile?id=${id}`);
                 }
-                else  db.query(`update account, booker
+                else  db.query(`update  booker
                                 set first_name='${fname}',last_name='${lname}',email='${email}',phone='${phone}',birth_date='${dob}'
-                                where account.id=booker.id
-                                and account.id=${id}`,(err)=>{
+                                where 
+                                 booker.id=${id}`,(err)=>{
                                     if (err) throw err;
                                     res.redirect('/profile');
                 })
@@ -288,7 +273,7 @@ router.post('/editPassword',isLoggedIn, async (req,res)=>{
     if (CheckOldPassword === "Not Link" || CheckOldPassword === "Safe") {
         let CheckNewPassword = getCheckLink(newPassword);
         if (CheckNewPassword === "Not Link" || CheckNewPassword === "Safe") {
-                db.query(`select password from account where id=${id}`,(err,results)=>{
+                db.query(`select password from booker where id=${id}`,(err,results)=>{
                     if (err) throw err;
                     if (results.length>0)  //account exists
                     {
@@ -300,7 +285,7 @@ router.post('/editPassword',isLoggedIn, async (req,res)=>{
                                 if (newPassword===newPassword2)  //new password confirmed
                                 {
                                     let hashedPassword= await bcrypt.hash(newPassword,10);
-                                    db.query(`update account set password='${hashedPassword}' where id=${id}`,(err)=>{
+                                    db.query(`update booker set password='${hashedPassword}' where id=${id}`,(err)=>{
                                         if (err) throw err;
                                         res.redirect('/profile');
                                     })
