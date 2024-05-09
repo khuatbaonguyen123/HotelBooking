@@ -239,7 +239,7 @@ body {
     display: flex;
     align-items: center;
     text-decoration: none;
-    color: var(--slate-700);
+    color: #c29c76;
     padding: 6px 16px;
 }
 .content-messages-list > * > a:hover {
