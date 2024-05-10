@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
 
 const ratingSchema = new mongoose.Schema({
-  idRoom: { type: Number, required: true },
+  idUser: { type: Number, required: true},
+  idRoom: { type: Number, required: true},
+  typeRoom:{type: Number, required: true},
+  idReversation: {type: Number, required: true},
   rating:  { type: Number, required: true },
-  idUser: { type: Number, required: true, unique: true},
+  comment: {type: String},
   timestamp: { type: Date, default: Date.now }
 });
 

@@ -82,15 +82,7 @@
         <h3 style="margin-left:15%; margin-top: 1cm; color:var(--grey-color); font-family:Josefin Sans Regular; font-weight:normal;">Diện tích phòng : 35m2</h3>
         <h3 style="margin-left:15%; margin-top: 1cm; color:var(--grey-color); font-family:Josefin Sans Regular; font-weight:normal;">Số lượng người      : 01-02 </h3>
         <h3 style="margin-left:15%; margin-top: 1cm; color:var(--grey-color); font-family:Josefin Sans Regular; font-weight:normal; margin-bottom: 1.5cm;">Loại giường         : 1 giường đơn 1m8</h3>
-        <!-- <h7 style="margin-left:15%; margin-top: 1cm; color:#999; font-family:SourceSansPro Regular; font-weight:normal;">Các thiết bị theo phòng</h7>
-        <ul style="margin-left:15%; margin-top: 1cm; color:rgb(190, 190, 190); font-family:Josefin Sans Regular; font-weight:normal; margin-bottom: 1.5cm;">
-            <li>+ Trang thiết bị hiện đại</li>
-            <li>+ Điều hòa 2 chiều</li>
-            <li>+ Giường với thiết kế vải đệm mềm và mượt</li>
-            <li>+ Thảm trải phòng</li>
-            <li>+ Rèm cửa 2 lớp</li>
-            <li>+ Tủ quần áo</li>
-        </ul> -->
+        
     </div>
 
     <div>
@@ -101,7 +93,7 @@
         <div class="wrapper">
             <form method="POST" action = "/submit?id=1">
                 <div class="rating">
-                    <input type="number" name="rating" hidden>
+                    <input type="hidden" name="rating" id="rating-input" value="0">
                     <i class='bx bx-star star' style="--i: 0;"></i>
                     <i class='bx bx-star star' style="--i: 1;"></i>
                     <i class='bx bx-star star' style="--i: 2;"></i>

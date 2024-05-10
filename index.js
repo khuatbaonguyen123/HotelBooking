@@ -12,6 +12,7 @@ const generalRouter = require('./routes/general');
 const bookingRouter = require('./routes/booking');
 const adminRouter = require('./routes/admin');
 const chatRouter = require('./routes/chatting');
+const rateRouter = require('./routes/rate');
 
 const chatDemo = require('./routes/chatdemo');
 
@@ -73,7 +74,7 @@ app.use(bookingRouter);
 app.use(adminRouter);
 app.use(chatRouter);
 app.use(ratingRouter);
-
+app.use(rateRouter);
 app.use(chatDemo);
 
 app.get('/get-session', (req, res) =>{
