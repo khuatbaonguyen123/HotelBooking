@@ -241,8 +241,8 @@
                     <p style = "color: white">${rate.stars} <span class="stars">&#9733</span></p>
                     <div class="progress">
                         <div class="bar" style ="width:${(rate.count / total_rating) * 100}%"></div>
-                    </div style = "color: white">
-                    <p>${rate.count.toLocaleString()}</p>
+                    </div>
+                    <p style = "color: white">${rate.count.toLocaleString()}</p>
                 </div>
         `;
         document.querySelector('.rating__progress').innerHTML += rating__progress
