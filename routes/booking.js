@@ -60,7 +60,7 @@ async function getRoomsOfType(roomType, arrivalDate, departureDate) {
                         WHERE reservation_id IN(
                             SELECT id
                             FROM reservation
-                            WHERE (status = 'accept' OR status = 'pending' OR status = 'checkin') AND ((date_in <= ? AND ? < date_out) OR (date_in < ? AND ? <= date_out) OR (? < date_in AND date_out < ?))
+                            WHERE (status = 'accept' OR status = 'checkin') AND ((date_in <= ? AND ? < date_out) OR (date_in < ? AND ? <= date_out) OR (? < date_in AND date_out < ?))
                         )
                     )`, [roomType, arrivalDate, arrivalDate, departureDate, departureDate, arrivalDate, departureDate], (err, results) => {
                 if (err) reject(new Error(err.message));
@@ -237,22 +237,22 @@ function isAvailable (req, res, next){
     const departureDate = req.body.departureDate;
     const roomNumber = req.body.rooms;
     console.log(arrivalDate, departureDate);
-    let query = `select * from vreservation
-            where number = ${roomNumber} and 
-            (status != 'checkout' and status != 'decline') and 
-            (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
-            ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
-    console.log(query);
-    db.query(query, (err, result) => {
-                console.log(err);
-                console.log(result);
-                if (result.length > 0) {
-                    res.json('Room is not available');
-                }
-                else{
-                    next();
-                }
-            });
+    roomNumber.forEach(element => {
+        console.log(element + '*');
+        let query = `select * from vreservation
+                    where number = ${element} and 
+                    (status != 'checkout' and status != 'decline') and 
+                    (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
+                    ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
+        console.log(query);
+        db.query(query, (err, result) => {
+            if(err) req.flash('errors', errors);
+            if (result.length > 0) {
+                res.json(`Room ${element} is not available`);
+            }
+        });
+    });
+    next();
 }
 
 router.post('/roomSelect',isLoggedIn, isAvailable, async (req, res) => {

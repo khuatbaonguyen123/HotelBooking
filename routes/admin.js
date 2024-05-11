@@ -9,9 +9,9 @@ function dateFormatting(dateType) {
   let month = dateType.getMonth() + 1;
   let year = dateType.getFullYear();
   const dateFormat = [
-    (date > 9 ? "" : "0") + date,
-    (month > 9 ? "" : "0") + month,
     year,
+    (month > 9 ? "" : "0") + month,
+    (date > 9 ? "" : "0") + date
   ].join("/");
   return dateFormat;
 }
@@ -93,9 +93,9 @@ router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
     if (index === 0 || element.id != arr[index - 1].id) {
       userReservation.push({
         id: element.id,
-        booker_id: element.booker_id,
         name: element.name,
         phone: element.phone,
+        status: element.status,
         date_in: dateFormatting(element.date_in),
         date_out: dateFormatting(element.date_out),
         description: [element.number],
@@ -186,10 +186,10 @@ router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
       bool: {
         should: [
           {match: { name: `"${search}"` }},
-          {match: { date_in: `"${search}"` }},
-          {match: { date_out: `"${search}"` }},
-          {match: { status: `"${search}"` }},
-          {match: { payment_date: `"${search}"` }}
+          {match_phrase: { date_in: `"${search}"` }},
+          {match_phrase: { date_out: `"${search}"` }},
+          {match_phrase: { status: `"${search}"` }},
+          {match_phrase: { payment_date: `"${search}"` }}
         ]
       }
     },
@@ -257,7 +257,7 @@ router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
 //   });
 // });
 
-router.get("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
+router.post("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
   db.query(`select * from reservation where id = '${id}'`, (err, result) => {
     if (err) throw err;
@@ -279,7 +279,7 @@ router.get("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
   });
 });
 
-router.get("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
+router.post("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
 
   db.query(`select * from reservation where id = '${id}'`, (err, result) => {
@@ -310,7 +310,7 @@ router.get("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
   });
 });
 
-router.get("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
+router.post("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
   db.query(`select * from reservation where id = '${id}'`, (err, result) => {
     if (err) throw err;
@@ -346,17 +346,17 @@ router.get("/admin/rooms", isLoggedInAdmin, (req, res) => {
   );
 });
 
-router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
-  const { id } = req.params;
-  console.log(id);
-  db.query(`delete from room where id = '${id}'`, (err, room) => {
-    if (err) throw err;
-    else {
-      console.log(room);
-      res.redirect("/admin/rooms");
-    }
-  });
-});
+// router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
+//   const { id } = req.params;
+//   console.log(id);
+//   db.query(`delete from room where id = '${id}'`, (err, room) => {
+//     if (err) throw err;
+//     else {
+//       console.log(room);
+//       res.redirect("/admin/rooms");
+//     }
+//   });
+// });
 
 // router.post("/admin/editRoom", isLoggedInAdmin, (req, res) => {
 //   const { id } = req.query;
