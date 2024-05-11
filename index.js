@@ -13,7 +13,6 @@ const bookingRouter = require('./routes/booking');
 const adminRouter = require('./routes/admin');
 const chatRouter = require('./routes/chatting');
 
-const chatDemo = require('./routes/chatdemo');
 
 const ratingRouter = require('./routes/rating');
 
@@ -74,7 +73,6 @@ app.use(adminRouter);
 app.use(chatRouter);
 app.use(ratingRouter);
 
-app.use(chatDemo);
 
 app.get('/get-session', (req, res) =>{
   res.send(req.session);
