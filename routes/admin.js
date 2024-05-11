@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../database");
+const clientES = require("../SearchEngine");
 // const Message = require("../dbmongo");
 
 function dateFormatting(dateType) {
@@ -8,9 +9,9 @@ function dateFormatting(dateType) {
   let month = dateType.getMonth() + 1;
   let year = dateType.getFullYear();
   const dateFormat = [
-    (date > 9 ? "" : "0") + date,
-    (month > 9 ? "" : "0") + month,
     year,
+    (month > 9 ? "" : "0") + month,
+    (date > 9 ? "" : "0") + date
   ].join("/");
   return dateFormat;
 }
@@ -32,7 +33,7 @@ router.post("/admin/login", (req, res) => {
     res.status(404).json({ message: "Please enter all fields" });
   else {
     db.query(
-      `select * from account where email='${email}' and type_of_account = 'admin'`,
+      `select * from admin where email='${email}'`,
       (err, results) => {
         if (err) throw err;
         if (results.length > 0) {
@@ -92,9 +93,9 @@ router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
     if (index === 0 || element.id != arr[index - 1].id) {
       userReservation.push({
         id: element.id,
-        booker_id: element.booker_id,
         name: element.name,
         phone: element.phone,
+        status: element.status,
         date_in: dateFormatting(element.date_in),
         date_out: dateFormatting(element.date_out),
         description: [element.number],
@@ -143,7 +144,7 @@ router.get("/admin/reservation", isLoggedInAdmin, (req, res) => {
 });
 //chat
 router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
-  const adminQuery = `SELECT id, email FROM account WHERE id = ${req.session.adminID};`;
+  const adminQuery = `SELECT id, email FROM admin WHERE id = ${req.session.adminID};`;
   db.query(adminQuery, (err, adminResult) => {
     if (err) {
       console.error("Error fetching admin details:", err);
@@ -153,17 +154,20 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
         user_id: adminResult[0].id, // Add user_id here
         email: adminResult[0].email,
       };
-      const userIdsQuery = "SELECT id FROM account";
+      const userIdsQuery = "SELECT id,last_name FROM booker";
       db.query(userIdsQuery, (err, userResults) => {
         if (err) {
           console.error("Error fetching user IDs:", err);
           throw err;
         } else {
-          const userIds = userResults.map((user) => user.id);
+          const users = userResults.map(user => ({
+            id: user.id,
+            last_name: user.last_name
+          }));
 
           res.render("adminChat.ejs", {
             user: adminData,
-            userIds: userIds
+            users: users,
           });
         }
       });
@@ -172,56 +176,88 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
 });
 
 
-//chat
 router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
   const { search } = req.body;
-  let record;
-  let userReservation;
-  if (!isNaN(search) && search) {
-    try {
-      record = await new Promise((resolve, reject) => {
-        db.query(
-          `select * from vReservation where id = ${search};`,
-          (err, results) => {
-            if (err) reject(new Error(err.message));
-            resolve(results);
-          }
-        );
-      });
-    } catch (error) {
-      console.log(error);
-    }
-
-    if (record.length > 0) {
-      record.forEach((element, index, arr) => {
-        if (index === 0 || element.id != arr[index - 1].id) {
-          userReservation = {
-            id: element.id,
-            booker_id: element.booker_id,
-            name: element.name,
-            phone: element.phone,
-            date_in: dateFormatting(element.date_in),
-            date_out: dateFormatting(element.date_out),
-            description: [element.number],
-            status: element.status,
-            price: element.total_price,
-            payment_date: dateFormatting(element.payment_date),
-          };
-        } else {
-          userReservation.description.push(element.number);
-        }
-      });
-    } else {
-      req.flash("error", "ID not found");
-    }
+  console.log(search);
+  console.log(`"${search}"`);
+  const data = await clientES.search({
+    index: 'bookingapp',
+    query: {
+      bool: {
+        should: [
+          {match: { name: `"${search}"` }},
+          {match_phrase: { date_in: `"${search}"` }},
+          {match_phrase: { date_out: `"${search}"` }},
+          {match_phrase: { status: `"${search}"` }},
+          {match_phrase: { payment_date: `"${search}"` }}
+        ]
+      }
+    },
+    size: 10
+    //_source: ["account_number", "balance"]
+  })
+  let userReservation = [];
+  for(let i = 0; i < data['hits']['hits'].length; i++) {
+    console.log(data['hits']['hits'][i]['_source']);
+    userReservation.push(data['hits']['hits'][i]['_source']);
   }
+  //let userReservation = data['hits']['hits'][0]['_source'];
+  console.log(userReservation);
+  //res.json(data['hits']['hits'][0]['_source']);
   res.render("adminReservation.ejs", {
-    userReservation,
-    message: req.flash("error"),
-  });
+      userReservation,
+      message: req.flash("error"),
+    });
 });
+// router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
+//   const { search } = req.body;
+//   let record;
+//   let userReservation;
+//   if (!isNaN(search) && search) {
+//     try {
+//       record = await new Promise((resolve, reject) => {
+//         db.query(
+//           `select * from vReservation where id = ${search};`,
+//           (err, results) => {
+//             if (err) reject(new Error(err.message));
+//             resolve(results);
+//           }
+//         );
+//       });
+//     } catch (error) {
+//       console.log(error);
+//     }
 
-router.get("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
+//     if (record.length > 0) {
+//       record.forEach((element, index, arr) => {
+//         if (index === 0 || element.id != arr[index - 1].id) {
+//           userReservation = {
+//             id: element.id,
+//             booker_id: element.booker_id,
+//             name: element.name,
+//             phone: element.phone,
+//             date_in: dateFormatting(element.date_in),
+//             date_out: dateFormatting(element.date_out),
+//             description: [element.number],
+//             status: element.status,
+//             price: element.total_price,
+//             payment_date: dateFormatting(element.payment_date),
+//           };
+//         } else {
+//           userReservation.description.push(element.number);
+//         }
+//       });
+//     } else {
+//       req.flash("error", "ID not found");
+//     }
+//   }
+//   res.render("adminReservation.ejs", {
+//     userReservation,
+//     message: req.flash("error"),
+//   });
+// });
+
+router.post("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
   db.query(`select * from reservation where id = '${id}'`, (err, result) => {
     if (err) throw err;
@@ -243,7 +279,7 @@ router.get("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
   });
 });
 
-router.get("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
+router.post("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
 
   db.query(`select * from reservation where id = '${id}'`, (err, result) => {
@@ -274,7 +310,7 @@ router.get("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
   });
 });
 
-router.get("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
+router.post("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
   db.query(`select * from reservation where id = '${id}'`, (err, result) => {
     if (err) throw err;
@@ -310,17 +346,17 @@ router.get("/admin/rooms", isLoggedInAdmin, (req, res) => {
   );
 });
 
-router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
-  const { id } = req.params;
-  console.log(id);
-  db.query(`delete from room where id = '${id}'`, (err, room) => {
-    if (err) throw err;
-    else {
-      console.log(room);
-      res.redirect("/admin/rooms");
-    }
-  });
-});
+// router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
+//   const { id } = req.params;
+//   console.log(id);
+//   db.query(`delete from room where id = '${id}'`, (err, room) => {
+//     if (err) throw err;
+//     else {
+//       console.log(room);
+//       res.redirect("/admin/rooms");
+//     }
+//   });
+// });
 
 // router.post("/admin/editRoom", isLoggedInAdmin, (req, res) => {
 //   const { id } = req.query;

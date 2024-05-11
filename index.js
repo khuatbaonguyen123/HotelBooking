@@ -14,13 +14,15 @@ const adminRouter = require('./routes/admin');
 const chatRouter = require('./routes/chatting');
 const rateRouter = require('./routes/rate');
 
-const chatDemo = require('./routes/chatdemo');
 
 const ratingRouter = require('./routes/rating');
 
+const { startDatabaseBackup } = require('./mysqldump');
+
+
 const app = express();
 
-
+startDatabaseBackup();
 mongoose.connect(process.env.MONGOLOCAL_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -76,6 +78,7 @@ app.use(chatRouter);
 app.use(ratingRouter);
 app.use(rateRouter);
 app.use(chatDemo);
+
 
 app.get('/get-session', (req, res) =>{
   res.send(req.session);

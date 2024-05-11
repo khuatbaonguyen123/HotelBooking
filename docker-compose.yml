@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    command: redis-server
+  mongo-0-a:
+    container_name: mongo-0-a
+    image: mongo
+    ports:
+      - 127.0.10.1:27017:27017
+    volumes:
+      - mongo-0-a:/data/db
+    restart: unless-stopped
+    command: "--wiredTigerCacheSizeGB 0.25 --replSet rs0"
+    networks:
+      - hotelbooking
+
+  mongo-0-b:
+    container_name: mongo-0-b
+    image: mongo
+    ports:
+      - 127.0.10.2:27017:27017
+    volumes:
+      - mongo-0-b:/data/db
+    restart: unless-stopped
+    command: "--wiredTigerCacheSizeGB 0.25 --replSet rs0"
+    networks:
+      - hotelbooking
+
+  mongo-0-c:
+    container_name: mongo-0-c
+    image: mongo
+    ports:
+      - 127.0.10.3:27017:27017
+    volumes:
+      - mongo-0-c:/data/db
+    restart: unless-stopped
+    command: "--wiredTigerCacheSizeGB 0.25 --replSet rs0"
+    networks:
+      - hotelbooking
+  
+
+volumes:
+  mongo-0-a:
+  mongo-0-b:
+  mongo-0-c:
+
+networks:
+  hotelbooking:

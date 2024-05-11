@@ -50,9 +50,9 @@ async function getCheckLink(Input) {
     }
 }
 
-router.post('/signup', async (req,res)=>{
-    const {fname, lname, email,password} = req.body;
-    let hashedPassword= await bcrypt.hash(password,10);
+router.post('/signup', async (req, res) => {
+    const { fname, lname, email, password, phone, dob } = req.body;
+    let hashedPassword = await bcrypt.hash(password, 10);
     let checkfName = await getCheckLink(fname);
     console.log("fname:" + checkfName);
     if (checkfName === "Not Link" || checkfName === "Safe") {
@@ -61,7 +61,7 @@ router.post('/signup', async (req,res)=>{
         if (checklName === "Not Link" || checklName === "Safe") {
             let checkPassword = await getCheckLink(password);
             console.log(checkPassword);
-            if ((checkPassword === "Not Link" || checkPassword === "Safe") ) {
+            if ((checkPassword === "Not Link" || checkPassword === "Safe")) {
                 db.beginTransaction((err) => {
                     if (err) throw err;
                     db.query(`SELECT * FROM booker WHERE email='${email}'`, (err, results) => {
@@ -107,6 +107,7 @@ router.post('/signup', async (req,res)=>{
         return res.status(400).json({ error: 'First name not valid.' });
     }
 })
+
 
 router.get('/init_redis', (req,res) =>{
     db.query(`SELECT count(*) as cnt FROM bookingapp.booker;`, (err, result) => {

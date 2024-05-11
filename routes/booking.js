@@ -28,24 +28,18 @@ async function limitRequest (req, res, next){
     let _ttl = await ttl(getIPUser);
     if(_ttl <= 0) {
         await set(getIPUser);
-        await expire(getIPUser, 2);
-        _ttl = 2;
+        await expire(getIPUser, 5);
+        _ttl = 5;
     }
     let numberRequest = await incr(getIPUser);
     if(numberRequest > 3) {
-        // return res.status(503).json({
-        //     status: 'error',
-        //     _ttl,
-        //     message: 'Server is busy!',
-        //     numberRequest
-        // })
         res.render("503_error.ejs");
     } else {
         next();
     }
 }
 
-router.get('/booking', isLoggedIn, limitRequest, async (req, res) => {
+router.get('/booking', isLoggedIn, async (req, res) => {
     res.render('booking.ejs',{messages: req.flash('errors')});
 }) //must log in to see
 
@@ -66,7 +60,7 @@ async function getRoomsOfType(roomType, arrivalDate, departureDate) {
                         WHERE reservation_id IN(
                             SELECT id
                             FROM reservation
-                            WHERE (status = 'accept' OR status = 'pending' OR status = 'checkin') AND ((date_in <= ? AND ? < date_out) OR (date_in < ? AND ? <= date_out) OR (? < date_in AND date_out < ?))
+                            WHERE (status = 'accept' OR status = 'checkin') AND ((date_in <= ? AND ? < date_out) OR (date_in < ? AND ? <= date_out) OR (? < date_in AND date_out < ?))
                         )
                     )`, [roomType, arrivalDate, arrivalDate, departureDate, departureDate, arrivalDate, departureDate], (err, results) => {
                 if (err) reject(new Error(err.message));
@@ -196,7 +190,7 @@ async function addRoomReserved(reservationId, roomId) {
     }
 }
 
-router.post('/booking',isLoggedIn, async (req, res) => {
+router.post('/booking',isLoggedIn, limitRequest, async (req, res) => {
     try {
         const { 'arrival-date': arrivalDate, 'departure-date': departureDate } = req.body;
         // console.log(arrivalDate, departureDate);
@@ -238,7 +232,30 @@ router.post('/booking',isLoggedIn, async (req, res) => {
     }
 });
 
-router.post('/roomSelect',isLoggedIn, async (req, res) => {
+function isAvailable (req, res, next){
+    const arrivalDate = req.body.arrivalDate;
+    const departureDate = req.body.departureDate;
+    const roomNumber = req.body.rooms;
+    console.log(arrivalDate, departureDate);
+    roomNumber.forEach(element => {
+        console.log(element + '*');
+        let query = `select * from vreservation
+                    where number = ${element} and 
+                    (status != 'checkout' and status != 'decline') and 
+                    (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
+                    ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
+        console.log(query);
+        db.query(query, (err, result) => {
+            if(err) req.flash('errors', errors);
+            if (result.length > 0) {
+                res.json(`Room ${element} is not available`);
+            }
+        });
+    });
+    next();
+}
+
+router.post('/roomSelect',isLoggedIn, isAvailable, async (req, res) => {
     try {
         console.log(req.body);
         // // Get the next reservation ID
