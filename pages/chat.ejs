@@ -193,7 +193,7 @@
                                     <div class="conversation-item-wrapper">
                                         <div class="conversation-item-box">
                                             <div class="conversation-item-text">
-                                                <p>${msg?.user_name}: ${msg?.message}</p>
+                                                <p> ${msg?.message}</p>
                                                 <div class="conversation-item-time">${formattedTime}</div>
                                             </div>
                                             <div class="conversation-item-dropdown">
@@ -219,7 +219,7 @@
             if (input.val()) {
                 socket.emit("client_send_message", {
                     user_id: $("#user_id").val(),
-                    user_name: $("#email").val(),
+                    //user_name: $("#email").val(),
                     message: input.val(),
                 });
                 input.val("");
@@ -233,7 +233,7 @@
       if (input.val()) {
                 socket.emit("client_send_message", {
                     user_id: $("#user_id").val(),
-                    user_name: $("#email").val(),
+                    //user_name: $("#email").val(),
                     message: input.val(),
                 });
                 input.val("");
@@ -270,7 +270,7 @@ const formattedTime =  `${dayOfMonth}/${month}/${year} ${hours}:${minutes}`;
                      <div class="conversation-item-wrapper">
                          <div class="conversation-item-box">
                              <div class="conversation-item-text">
-                                 <p>${msg?.user_name}: ${msg?.message}</p>
+                                 <p> ${msg?.message}</p>
                                  <div class="conversation-item-time">${formattedTime}</div>
                              </div>
                              <div class="conversation-item-dropdown">
