@@ -3,47 +3,20 @@ use bookingapp;
 -- TABLES
 
 -- we do not concern about the info of admin so we don't need admin table 
-CREATE TABLE account (
+CREATE TABLE admin (
   id int AUTO_INCREMENT primary key,
-  email nvarchar(255) not null,
-  password varchar(255) not null,
-  type_of_account ENUM ('booker', 'admin') default 'booker' -- the admin account is only can be created in the sql server;
+  email varchar(255) not null,
+  password varchar(255) not null
 );
 
-CREATE TABLE rating (
-  id_rating int AUTO_INCREMENT,
-  rating int,
-  PRIMARY KEY (id_rating)
-);
-
-CREATE TABLE rating2 (
-  id_rating int AUTO_INCREMENT,
-  rating int,
-  PRIMARY KEY (id_rating)
-);
-
-CREATE TABLE rating3 (
-  id_rating int AUTO_INCREMENT,
-  rating int,
-  PRIMARY KEY (id_rating)
-);
-
-CREATE TABLE rating4 (
-  id_rating int AUTO_INCREMENT,
-  rating int,
-  PRIMARY KEY (id_rating)
-);
-
-CREATE TABLE rating5 (
-  id_rating int AUTO_INCREMENT,
-  rating int,
-  PRIMARY KEY (id_rating)
-);
-
-CREATE TABLE rating6 (
-  id_rating int AUTO_INCREMENT,
-  rating int,
-  PRIMARY KEY (id_rating)
+CREATE TABLE booker (
+	id int AUTO_INCREMENT primary key,
+	email varchar(255) not null,
+	password varchar(255) not null,
+    first_name varchar(50) not null,
+	last_name varchar(50) not null,
+	birth_date date,
+	phone char(10) not null
 );
 
 CREATE TABLE type (
@@ -63,15 +36,6 @@ CREATE TABLE room (
   CONSTRAINT FK_TypeID FOREIGN KEY (type_id) references type(id)
 );
 
-CREATE TABLE booker (
-  id int, -- the id is referencing to id in account
-  first_name varchar(50) not null,
-  last_name varchar(50) not null,
-  birth_date date,
-  phone char(10) not null,
-  PRIMARY KEY (id),
-  CONSTRAINT FK_BookerID FOREIGN KEY (id) references account(id)
-);
 CREATE TABLE reservation (
   id int PRIMARY KEY auto_increment,
   date_in date,

@@ -139,9 +139,9 @@ async function getSort(userId) {
 
 async function getInfo(i) {
     return new Promise(async (resolve, reject) => {
-        db.query(`select id, name, description, link, image, price_each_day from type t 
+        db.query(`select t.id, name, description, link, image, price_each_day from type t 
                     join month_price m on t.id = m.type_id 
-                    where m.month = extract(month from NOW()) and id =  ${i};`, 
+                    where m.month = extract(month from NOW()) and t.id =  ${i};`, 
                     (err, result) => {
             if (err) {
                 reject(err);
@@ -222,13 +222,13 @@ router.get('/get_data', async (req, res) =>{
     else {
         var query = "";
         if(type == 'Price') {
-            query = "select id, name, description, link, image, price_each_day from type t " + 
+            query = "select t.id, name, description, link, image, price_each_day from type t " + 
             "join month_price m on t.id = m.type_id " +
             "where m.month = extract(month from NOW()) " +
             "order by price_each_day asc;";
         }
         if(type == 'Popularity') {
-            query = "select id, name, description, link, image, price_each_day from type t " + 
+            query = "select t.id, name, description, link, image, price_each_day from type t " + 
             "join month_price m on t.id = m.type_id " +
             "left join (select count(*) as cnt, room.type_id from room_reserved rr " +
             "join room on room.id = rr.room_id " + 
@@ -237,7 +237,7 @@ router.get('/get_data', async (req, res) =>{
             "order by T.cnt desc;";
         }
         if(type == 'Spacing') {
-            query = "select id, name, description, link, image, price_each_day from type t " + 
+            query = "select t.id, name, description, link, image, price_each_day from type t " + 
             "join month_price m on t.id = m.type_id " +
             "where m.month = extract(month from NOW()) " +
             "order by capacity asc;";
@@ -255,7 +255,7 @@ router.get('/get_data', async (req, res) =>{
 
 router.post('/room_search', function(req, res) {
     const { search } = req.body;
-    const query = `select distinct id, name, description, link, image, price_each_day from type t
+    const query = `select distinct t.id, name, description, link, image, price_each_day from type t
                   join month_price m on t.id = m.type_id
                   where m.month = extract(month from NOW()) and
                   match(description) against('${search}');`;

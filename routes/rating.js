@@ -30,8 +30,6 @@ router.post('/submit', async (req, res) => {
     try{
         for (let i = 0; i < results.length; i ++) {
             const userId = results[i].booker_id;
-          
-            // const dateIn = results[i].date_in;
             const newRating = await Rating.create({ idRoom: Number(id), rating, idUser: userId});
             res.redirect(`/Assignment_s${id}`);
         }
@@ -44,22 +42,5 @@ router.post('/submit', async (req, res) => {
 
 });
 
-
-router.get('/data', async (req, res) => {
-    const {id} = req.query;
-    console.log(id);
-    try {
-        const data = await Rating.aggregate([
-            { $match: {idRoom: Number(id)} },
-            { $group: { _id: '$rating', count: { $sum: 1 } } },
-            { $project: { _id: 0, stars: '$_id', count: 1 } }
-        ]);
-        console.log(data);
-        res.json(data);
-    } catch (error) {
-        console.error('Error retrieving data:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-});
 
 module.exports = router;

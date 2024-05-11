@@ -94,10 +94,6 @@
     </div>
 
     <div>
-        <div class="user">
-            <i class='bx bxs-hand-right'></i>
-            <div class = "use_rating">Rating the room</div>
-        </div>
         <div class="wrapper">
             <form method="POST" action = "/submit?id=4">
                 <div class="rating">
@@ -111,18 +107,6 @@
                 <button type="submit" class='btns_submit' id="submitBtn">Submit</button>
             </form>
         </div>
-
-
-        <script>
-            function showSuccessToast() {
-                toast({
-                    title: "Success!",
-                    message: "Rating submitted successfully!",
-                    type: "success",
-                    duration: 5000
-                });
-            }
-    </script>
 
     </div>
 
@@ -139,94 +123,30 @@
             </div>
         </div>
     </div>
-    <% if (locals.session.userId) { %>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-            const user = document.querySelector(".user");
-            const design = document.querySelector(".wrapper");
+    <div class="user">
+        <div class = "use_rating">Comment</div>
+    </div>
 
-            user.addEventListener("click", function() {
-                design.classList.toggle("active");
-            });
-        });
-        </script>
-    <% } %>
-
-
-    <% if (!locals.session.userId) { %>
-        <div id="toast"></div>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const user = document.querySelector(".user");
-
-                user.addEventListener("click", function() {
-                    showErrorToast();
-                });
-            });
+    <div id="comments-container" style="margin-left: 15%; margin-right: 15%; margin-bottom: 100px; max-height:400px; overflow-y: auto;">
         
-
-            function showErrorToast() {
-                toast({
-                    title: "Failure!",
-                    message: "You are not logged in.",
-                    type: "error",
-                    duration: 5000
-                });
-            }
-            function toast({ title = "", message = "", type = "info", duration = 3000 }) {
-            const main = document.getElementById("toast");
-            if (main) {
-                const toast = document.createElement("div");
-
-                // Auto remove toast
-                const autoRemoveId = setTimeout(function () {
-                main.removeChild(toast);
-                }, duration + 1000);
-
-                // Remove toast when clicked
-                toast.onclick = function (e) {
-                if (e.target.closest(".toast__close")) {
-                    main.removeChild(toast);
-                    clearTimeout(autoRemoveId);
+    </div>
+    <script>
+        fetch('/comment?id=4')
+            .then(response => {
+                if (!response.ok) {
+                throw new Error('Network response was not ok');
                 }
-                };
+                return response.text();
+            })
+            .then(data => {
+                document.getElementById('comments-container').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            });
 
-                const icons = {
-                success: "fas fa-check-circle",
-                info: "fas fa-info-circle",
-                warning: "fas fa-exclamation-circle",
-                error: "fas fa-exclamation-circle"
-                };
-                const icon = icons[type];
-                const delay = (duration / 1000).toFixed(2);
-
-                toast.classList.add("toast", `toast--${type}`);
-                toast.style.animation = `slideInLeft ease .3s, fadeOut linear 1s ${delay}s forwards`;
-
-                toast.innerHTML = `
-                                <div class="toast__icon">
-                                    <i class="${icon}"></i>
-                                </div>
-                                <div class="toast__body">
-                                    <h3 class="toast__title">${title}</h3>
-                                    <p class="toast__msg">${message}</p>
-                                </div>
-                                <div class="toast__close">
-                                    <i class="fas fa-times"></i>
-                                </div>
-                            `;
-                main.appendChild(toast);
-            }
-            }
-
-        </script>
-        <% } %>
-        
-     
+    </script>
     
-
-
-
     <script>
         const listImage = document.querySelector('.list-images')
         const imgs = document.getElementsByTagName('img')
@@ -318,10 +238,10 @@
     data.forEach(rate => {
         let rating__progress = `
         <div class="rating__progress-value">
-                    <p>${rate.stars} <span class="stars">&#9733</span></p>
+                    <p style = "color: white">${rate.stars} <span class="stars">&#9733</span></p>
                     <div class="progress">
                         <div class="bar" style ="width:${(rate.count / total_rating) * 100}%"></div>
-                    </div>
+                    </div style = "color: white">
                     <p>${rate.count.toLocaleString()}</p>
                 </div>
         `;

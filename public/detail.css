@@ -154,14 +154,10 @@
     font-size: 30px;
     margin-left: 15%;
     margin-bottom: 1.5cm;
-	cursor: pointer;
 	width: 10cm;
 	color: var(--blue)
 }
 
-.user:hover {
-color:var(--blue-d-1);
-}
 .user {
 	margin-left: 15%;
 	color: var(--blue);
@@ -417,4 +413,8 @@ color:var(--blue-d-1);
 }
 .btn-group .btn.cancel:hover {
 	background: var(--light);
+}
+
+.com {
+    margin-bottom: 1.5cm; 
 }
