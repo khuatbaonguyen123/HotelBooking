@@ -16,9 +16,12 @@ const chatRouter = require('./routes/chatting');
 
 const ratingRouter = require('./routes/rating');
 
+const { startDatabaseBackup } = require('./mysqldump');
+
+
 const app = express();
 
-
+startDatabaseBackup();
 mongoose.connect(process.env.MONGOLOCAL_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
