@@ -3,11 +3,20 @@ use bookingapp;
 -- TABLES
 
 -- we do not concern about the info of admin so we don't need admin table 
-CREATE TABLE account (
+CREATE TABLE admin (
   id int AUTO_INCREMENT primary key,
-  email nvarchar(255) not null,
-  password varchar(255) not null,
-  type_of_account ENUM ('booker', 'admin') default 'booker' -- the admin account is only can be created in the sql server;
+  email varchar(255) not null,
+  password varchar(255) not null
+);
+
+CREATE TABLE booker (
+	id int AUTO_INCREMENT primary key,
+	email varchar(255) not null,
+	password varchar(255) not null,
+    first_name varchar(50) not null,
+	last_name varchar(50) not null,
+	birth_date date,
+	phone char(10) not null
 );
 
 CREATE TABLE rating (
@@ -52,8 +61,7 @@ CREATE TABLE type (
 	capacity int,
 	description TEXT,
 	link VARCHAR(255),
-	image VARCHAR(255),
-  FULLTEXT(description)
+	image VARCHAR(255)
 );
 
 CREATE TABLE room (
@@ -63,15 +71,6 @@ CREATE TABLE room (
   CONSTRAINT FK_TypeID FOREIGN KEY (type_id) references type(id)
 );
 
-CREATE TABLE booker (
-  id int, -- the id is referencing to id in account
-  first_name varchar(50) not null,
-  last_name varchar(50) not null,
-  birth_date date,
-  phone char(10) not null,
-  PRIMARY KEY (id),
-  CONSTRAINT FK_BookerID FOREIGN KEY (id) references account(id)
-);
 CREATE TABLE reservation (
   id int PRIMARY KEY auto_increment,
   date_in date,
@@ -91,12 +90,14 @@ CREATE TABLE room_reserved (
 
 -- this table is to update price for each month and year
 CREATE TABLE month_price (
-  type_id int,
-  month int,
-  year int,
-  price_each_day int,
-  PRIMARY KEY (type_id, month, year),
-  CONSTRAINT FK_month_price_type_id FOREIGN KEY (type_id) references type(id)
+  id INT AUTO_INCREMENT,
+  type_id INT,
+  month INT,
+  year INT,
+  price_each_day INT,
+  PRIMARY KEY (id),
+  UNIQUE (type_id, month, year),
+  CONSTRAINT FK_month_price_type_id FOREIGN KEY (type_id) REFERENCES type(id)
 );
 
 CREATE TABLE payment (
@@ -119,7 +120,7 @@ DEFAULT CHARACTER SET = utf8mb4;
 
 -- INDEXS
 
-create index email_idx on account(email);
+create index email_idx on booker(email);
 -- for further improvement of app we can add some other index to improve running speed
 
 -- SOME EVENT OR TRIGGER OR PROCEDURE OR FUNCTION
@@ -174,7 +175,6 @@ DELIMITER ;
 CREATE EVENT update_status_event
 ON SCHEDULE EVERY 1 DAY
 DO
-
     UPDATE reservation
     SET status = 'decline'
     WHERE status = 'accept' AND date_in < curdate();
@@ -195,7 +195,7 @@ where b.id = re.booker_id and re.id=p.reservation_id and r.reservation_id = re.i
     
 create view vroomlist as
 select room.id, room.number, room.type_id, 
-	   if(r.status is null or r.status = "checkout", "available", r.status) as status, 
+	   if(r.status is null, "available", r.status) as status, 
        if(first_name is null, '', concat(last_name, ' ', first_name)) as booker
 from room
 left join room_reserved rr on room.id = rr.room_id
@@ -364,5 +364,5 @@ values
 (5,12,2024,400),
 (6,12,2024,350);
 
-insert into account(email,password,type_of_account)
-values ('admin@test.com','admin','admin');
+insert into admin(email,password)
+values ('admin@test.com','admin');
