@@ -45,6 +45,8 @@ router.post('/rate', async (req, res) => {
                 if (existingRating) {
                     existingRating.comment = comment;
                     existingRating.rating = ratings;
+                    existingRating.timestamp = new Date();
+                    existingRating.comment += " (update)";
                     await existingRating.save();
                 }
                 else {

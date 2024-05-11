@@ -74,25 +74,26 @@ router.post('/signup', async (req, res) => {
                             req.flash('error', 'Email already registered');
                             res.redirect('/signupform');
                             db.rollback();
-                        } else {
-                            db.query(`INSERT INTO booker (email, password, first_name, last_name, phone, birth_date) VALUES ('${email}', '${hashedPassword}', '${fname}', '${lname}', '${phone}', '${dob}')`, (err) => {
-                                if (err) {
-                                    db.rollback(() => {
-                                        throw err;
-                                    });
-                                }
-                                db.commit((err) => {
+                        } else {                              
+                                const { fname, lname, phone, dob } = req.body;
+                                db.query(`INSERT INTO booker( email, password, first_name, last_name, birth_date, phone) VALUES ('${email}', '${hashedPassword}', '${fname}','${lname}','${dob}','${phone}')`, (err) => {
                                     if (err) {
                                         db.rollback(() => {
                                             throw err;
                                         });
                                     }
-                                    res.redirect('/init_redis');
+                                    db.commit((err) => {
+                                        if (err) {
+                                            db.rollback(() => {
+                                                throw err;
+                                            });
+                                        }
+                                        res.redirect('/init_redis');
+                                    });
                                 });
-                            });
-                        }
+                            }
+                        });
                     });
-                });
             }
             else {
                 return res.status(400).json({ error: 'Password not valid.' });
@@ -138,12 +139,14 @@ router.post('/signin', async (req, res) => {
                     if (isMatch) {
                         req.session.userId = user.id;
                         res.redirect('/index');
-                    } else {
+                    } 
+                    else {
                         req.flash('error', 'Password is not correct');
                         res.redirect('/loginform');
                     }
                 });
-            } else {
+            } 
+            else {
                 req.flash('error', 'Email is not registered');
                 res.redirect('/loginform');
             }
@@ -156,11 +159,11 @@ router.post('/signin', async (req, res) => {
 
 router.get('/profile', isLoggedIn, (req, res) => {
     db.query(`select * 
-              from booker 
+              from  booker 
               where booker.id=${req.session.userId}`, (err,results)=>{
                 if (err) throw err;
                 const userData=results[0];
-                db.query(`select b.reservation_id,date_in,date_out,number,a.status
+                db.query(`select b.reservation_id,date_in,date_out,number,a.status, type_id
                 from reservation a 
                 join room_reserved b on a.id=b.reservation_id 
                 join room c on b.room_id=c.id join payment d on a.id=d.reservation_id
@@ -170,10 +173,12 @@ router.get('/profile', isLoggedIn, (req, res) => {
                             const userReservation = [];
                             let i=0; //number of reservations
                             results.forEach((element,index,arr) => {
-                                if (index===0 || element.reservation_id != arr[index-1].reservation_id)
+                                if (index===0 || element.type_id != arr[index-1].type_id)
                                 {
                                     userReservation.push({
+                                        cnt: i + 1,
                                         reservation_id: element.reservation_id,
+                                        typeRoom: element.type_id,
                                         date_in: element.date_in,
                                         date_out: element.date_out,
                                         roomList: [element.number],
@@ -202,7 +207,7 @@ router.get('/editProfile', isLoggedIn, (req, res) => {
         if (Number(id)===req.session.userId)  //user can only edit their own profile 
         {
             db.query(`select * 
-                    from booker 
+                    from  booker
                     where booker.id=${id}`,(err,results)=>{
                         if (err) throw err;
                         const userData=results[0];
@@ -239,10 +244,9 @@ router.post('/editProfile',isLoggedIn, async(req,res)=>{
                     req.flash('error','Email already registered');
                     res.redirect(`/editProfile?id=${id}`);
                 }
-                else  db.query(`update  booker
+                else  db.query(`update booker
                                 set first_name='${fname}',last_name='${lname}',email='${email}',phone='${phone}',birth_date='${dob}'
-                                where 
-                                 booker.id=${id}`,(err)=>{
+                                and booker.id=${id}`,(err)=>{
                                     if (err) throw err;
                                     res.redirect('/profile');
                 })
