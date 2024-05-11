@@ -196,7 +196,18 @@ router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
     size: 10
     //_source: ["account_number", "balance"]
   })
-  res.json(data['hits']['hits'][0]['_source']);
+  let userReservation = [];
+  for(let i = 0; i < data['hits']['hits'].length; i++) {
+    console.log(data['hits']['hits'][i]['_source']);
+    userReservation.push(data['hits']['hits'][i]['_source']);
+  }
+  //let userReservation = data['hits']['hits'][0]['_source'];
+  console.log(userReservation);
+  //res.json(data['hits']['hits'][0]['_source']);
+  res.render("adminReservation.ejs", {
+      userReservation,
+      message: req.flash("error"),
+    });
 });
 // router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
 //   const { search } = req.body;
