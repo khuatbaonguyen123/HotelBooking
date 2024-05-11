@@ -15,9 +15,6 @@ const chatRouter = require('./routes/chatting');
 const rateRouter = require('./routes/rate');
 
 
-
-const ratingRouter = require('./routes/rating');
-
 const { startDatabaseBackup } = require('./mysqldump');
 
 
@@ -76,7 +73,6 @@ app.use(usersRouter);
 app.use(bookingRouter);
 app.use(adminRouter);
 app.use(chatRouter);
-app.use(ratingRouter);
 app.use(rateRouter);
 
 

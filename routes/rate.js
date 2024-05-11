@@ -10,11 +10,6 @@ router.post('/rate', async (req, res) => {
     const id_reservation = req.body.numberRoom;
     const comment = req.body.comment;
 
-    console.log(req.session.userId);
-    console.log(id_reservation);
-    console.log(roomType);
-    console.log(ratings);
-
     const sql_query = `SELECT DISTINCT k.id, rr.reservation_id , type_id 
                         FROM booker k 
                         JOIN reservation r ON r.booker_id = k.id 
@@ -98,7 +93,6 @@ router.get('/data', async (req, res) => {
             { $group: { _id: '$rating', count: { $sum: 1 } } },
             { $project: { _id: 0, stars: '$_id', count: 1 } }
         ]);
-        console.log(data);
         res.json(data);
     } catch (error) {
         console.error('Error retrieving data:', error);
