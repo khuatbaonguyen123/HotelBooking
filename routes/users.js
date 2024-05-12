@@ -173,7 +173,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
                             const userReservation = [];
                             let i=0; //number of reservations
                             results.forEach((element,index,arr) => {
-                                if (index===0 || element.type_id != arr[index-1].type_id)
+                                if (index===0 || element.type_id != arr[index-1].type_id || element.reservation_id != arr[index-1].reservation_id)
                                 {
                                     userReservation.push({
                                         cnt: i + 1,
