@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../database");
 const clientES = require("../SearchEngine");
+const { search } = require("./admin");
 // const Message = require("../dbmongo");
 
 function dateFormatting(dateType) {
@@ -201,9 +202,11 @@ router.post("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
 router.get("/admin/reservation", isLoggedInAdmin, (req, res) => {
   let userReservation;
   let keyword;
+  let searchby = "default";
   let currentPage;
   res.render("adminReservation.ejs", {
     userReservation,
+    searchby,
     keyword,
     currentPage,
     message: req.flash("error"),
@@ -242,42 +245,146 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
   });
 });
 
-
-router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1; // Trang hiện tại, mặc định là trang 1
-    const limit = 10; // Số lượng mục trên mỗi trang
-    const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu từ CSDL
-    let { searchby, keyword } = req.query;
-    console.log(keyword);
-    console.log(req.params, req.query, req.body);
-    console.log(`"${keyword}"`);
-    const data = await clientES.search({
-      index: 'bookingapp',
-      query: {
-        bool: {
-          should: [
-            {match: { name: `"${keyword}"` }},
-            {match_phrase: { date_in: `"${keyword}"` }},
-            {match_phrase: { date_out: `"${keyword}"` }},
-            {match_phrase: { status: `"${keyword}"` }},
-            {match_phrase: { payment_date: `"${keyword}"` }}
-          ]
-        }
-      },
-      size: limit,
-      from: offset
-      //_source: ["account_number", "balance"]
-    })
-    let userReservation = [];
-    for(let i = 0; i < data['hits']['hits'].length; i++) {
-      console.log(data['hits']['hits'][i]['_source']);
-      userReservation.push(data['hits']['hits'][i]['_source']);
+function getReservationData (searchby, keyword, limit, offset) {
+  return new Promise(async (resolve, reject) => {
+    if(searchby == 'default') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            should: [
+              {match: { name: `"${keyword}"` }},
+              {match_phrase: { date_in: `"${keyword}"` }},
+              {match_phrase: { date_out: `"${keyword}"` }},
+              {match_phrase: { description: keyword }},
+              {match_phrase: { status: `"${keyword}"` }},
+              {match_phrase: { payment_date: `"${keyword}"` }}
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if (searchby == 'id') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { bid: keyword }}
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if (searchby == 'name') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { name: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if(searchby == 'datein') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { date_in: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if(searchby == 'dateout') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { date_out: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    }  else if(searchby == 'rooms') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { description: keyword }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if(searchby == 'status') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { status: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
     }
-    //let userReservation = data['hits']['hits'][0]['_source'];
-    console.log(userReservation);
-    //res.json(data['hits']['hits'][0]['_source']);
-  // Đếm tổng số lượng booking để tính số trang
+  });
+}
+
+function getTotalCount(searchby, keyword) {
+  return new Promise(async (resolve, reject) => {
+    if(searchby == 'default') {
     const total = await clientES.count({
       index: 'bookingapp',
       query: {
@@ -286,17 +393,100 @@ router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
             {match: { name: `"${keyword}"` }},
             {match_phrase: { date_in: `"${keyword}"` }},
             {match_phrase: { date_out: `"${keyword}"` }},
+            {match_phrase: { description: keyword }},
             {match_phrase: { status: `"${keyword}"` }},
             {match_phrase: { payment_date: `"${keyword}"` }}
           ]
         }
       }
-      //_source: ["account_number", "balance"]
     })
-    const totalCount = total["count"];
+    resolve(total["count"]);
+  } else if(searchby == 'id') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { bid: keyword }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'name') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { name: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'datein') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { date_in: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'dateout') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { date_out: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  }  else if(searchby == 'rooms') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { description: keyword }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'status') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { status: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  }
+  })
+}
+router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Trang hiện tại, mặc định là trang 1
+    const limit = 10; // Số lượng mục trên mỗi trang
+    const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu từ CSDL
+    let { searchby, keyword } = req.query;
+    const userReservation = await getReservationData(searchby, keyword, limit, offset);
+    //console.log(userReservation);
+    const totalCount = await getTotalCount(searchby, keyword);
     const totalPages = Math.ceil(totalCount / limit); // Tính tổng số trang
     // Truyền dữ liệu và thông tin phân trang vào template
-    console.log(keyword, totalPages, page);
       res.render('adminReservation.ejs', {
           userReservation,
           searchby,
@@ -310,53 +500,6 @@ router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-// router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
-//   const { search } = req.body;
-//   let record;
-//   let userReservation;
-//   if (!isNaN(search) && search) {
-//     try {
-//       record = await new Promise((resolve, reject) => {
-//         db.query(
-//           `select * from vReservation where id = ${search};`,
-//           (err, results) => {
-//             if (err) reject(new Error(err.message));
-//             resolve(results);
-//           }
-//         );
-//       });
-//     } catch (error) {
-//       console.log(error);
-//     }
-
-//     if (record.length > 0) {
-//       record.forEach((element, index, arr) => {
-//         if (index === 0 || element.id != arr[index - 1].id) {
-//           userReservation = {
-//             id: element.id,
-//             booker_id: element.booker_id,
-//             name: element.name,
-//             phone: element.phone,
-//             date_in: dateFormatting(element.date_in),
-//             date_out: dateFormatting(element.date_out),
-//             description: [element.number],
-//             status: element.status,
-//             price: element.total_price,
-//             payment_date: dateFormatting(element.payment_date),
-//           };
-//         } else {
-//           userReservation.description.push(element.number);
-//         }
-//       });
-//     } else {
-//       req.flash("error", "ID not found");
-//     }
-//   }
-//   res.render("adminReservation.ejs", {
-//     userReservation,
-//     message: req.flash("error"),
-//   });
-// });
 
 router.post("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
@@ -446,38 +589,6 @@ router.get("/admin/rooms", isLoggedInAdmin, (req, res) => {
     }
   );
 });
-
-// router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
-//   const { id } = req.params;
-//   console.log(id);
-//   db.query(`delete from room where id = '${id}'`, (err, room) => {
-//     if (err) throw err;
-//     else {
-//       console.log(room);
-//       res.redirect("/admin/rooms");
-//     }
-//   });
-// });
-
-// router.post("/admin/editRoom", isLoggedInAdmin, (req, res) => {
-//   const { id } = req.query;
-//   console.log(id);
-//   db.query(
-//     `select *
-//             from facilities f
-//             where f.room_id=${id}`,
-//     (err, data) => {
-//       if (err) {
-//         throw err;
-//       }
-//       console.log(data);
-//       if (data) {
-//         //user exists in database
-//         res.render("adminEditRoom.ejs", { data, message: req.flash("error") });
-//       } else res.redirect("/admin/rooms");
-//     }
-//   );
-// });
 
 router.post("/admin/roomlist", isLoggedInAdmin, (req, res) => {
   const { id } = req.query;
