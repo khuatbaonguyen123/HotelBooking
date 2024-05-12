@@ -74,39 +74,102 @@ router.get("/admin/logout", isLoggedInAdmin, (req, res) => {
   res.redirect("/admin/login");
 });
 //DASHBOARD
-router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
-  let response1;
-  let userReservation = [];
-  try {
-    response1 = await new Promise((resolve, reject) => {
-      db.query(`select * from vDashboard`, (err, results) => {
-        if (err) reject(new Error(err.message));
-        resolve(results);
-      });
-    });
-  } catch (error) {
-    console.log(error);
-  }
+// router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
+//   let response1;
+//   let userReservation = [];
+//   try {
+//     response1 = await new Promise((resolve, reject) => {
+//       db.query(`select * from vDashboard`, (err, results) => {
+//         if (err) reject(new Error(err.message));
+//         resolve(results);
+//       });
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
 
-  let i = 0; //number of reservations
-  response1.forEach((element, index, arr) => {
-    if (index === 0 || element.id != arr[index - 1].id) {
-      userReservation.push({
-        id: element.id,
-        name: element.name,
-        phone: element.phone,
-        status: element.status,
-        date_in: dateFormatting(element.date_in),
-        date_out: dateFormatting(element.date_out),
-        description: [element.number],
+//   let i = 0; //number of reservations
+//   response1.forEach((element, index, arr) => {
+//     if (index === 0 || element.id != arr[index - 1].id) {
+//       userReservation.push({
+//         id: element.id,
+//         name: element.name,
+//         phone: element.phone,
+//         status: element.status,
+//         date_in: dateFormatting(element.date_in),
+//         date_out: dateFormatting(element.date_out),
+//         description: [element.number],
+//       });
+//       i++;
+//     } else {
+//       userReservation[i - 1].description.push(element.number);
+//     }
+//   });
+//   res.render("adminDashboard.ejs", { userReservation });
+// }); //must login to see
+
+router.get('/admin/dashboard', isLoggedInAdmin, async (req, res) => {
+  try {
+      const page = parseInt(req.query.page) || 1; // Trang hiện tại, mặc định là trang 1
+      const limit = 10; // Số lượng mục trên mỗi trang
+      const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu từ CSDL
+
+      let response1;
+      try {
+          // Lấy dữ liệu từ CSDL với giới hạn số lượng mục và vị trí bắt đầu
+          response1 = await new Promise((resolve, reject) => {
+              db.query(`SELECT * FROM vDashboard LIMIT ${limit} OFFSET ${offset}`, (err, results) => {
+                  if (err) reject(new Error(err.message));
+                  resolve(results);
+              });
+          });
+      } catch (error) {
+          console.log(error);
+          throw new Error('Error fetching data from database');
+      }
+
+      let userReservation = [];
+      // Xử lý dữ liệu nhận được từ CSDL
+      response1.forEach((element, index, arr) => {
+          const booking = {
+              id: element.id,
+              booker_id: element.booker_id,
+              name: element.name,
+              phone: element.phone,
+              date_in: dateFormatting(element.date_in),
+              date_out: dateFormatting(element.date_out),
+              description: [element.number], // Khởi tạo mảng chứa description
+          };
+
+          // Gom nhóm description theo cùng một booking id
+          if (index > 0 && element.id === arr[index - 1].id) {
+              userReservation[userReservation.length - 1].description.push(element.number);
+          } else {
+              userReservation.push(booking);
+          }
       });
-      i++;
-    } else {
-      userReservation[i - 1].description.push(element.number);
-    }
-  });
-  res.render("adminDashboard.ejs", { userReservation });
-}); //must login to see
+
+      // Đếm tổng số lượng booking để tính số trang
+      const totalCount = await new Promise((resolve, reject) => {
+          db.query('SELECT COUNT(DISTINCT id) AS totalCount FROM vDashboard', (err, results) => {
+              if (err) reject(new Error(err.message));
+              resolve(results[0].totalCount);
+          });
+      });
+
+      const totalPages = Math.ceil(totalCount / limit); // Tính tổng số trang
+
+      // Truyền dữ liệu và thông tin phân trang vào template
+      res.render('adminDashboard.ejs', {
+          userReservation,
+          totalPages,
+          currentPage: page
+      });
+  } catch (error) {
+      console.error('Error processing dashboard:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
 
 router.post("/admin/accept/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
