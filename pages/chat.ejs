@@ -8,56 +8,16 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
     />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
-    <style>
-        .box-chat {
-            width: 400px;
-            height: 100vh;
-            margin: auto;
-            position: relative;
-        }
-
-        .messages-box {
-            font-size: 20px;
-            position: absolute;
-            width: 800px;
-            height: 80vh;
-            bottom: 80px;
-            color: black;
-            border-radius: 8px;
-            border: 6px solid #455D58;
-            overflow-y: auto;
-        }
-
-
-        .message-input-div {
-            position: absolute;
-            bottom: 0;
-        }
-
-        #message-input {
-            background: rgba(60, 60, 60, 0.4);
-            color: white;
-            width: 800px;
-            height: 42px;
-        }
-
-        #message-input::placeholder {
-            color: white;
-            opacity: 0.4;
-        }
-
-        .box-title {
-            position: absolute;
-            font-size: 30px;
-            color: #455D58;
-            top: 30px;
-        }
-    </style>
+    <link rel="stylesheet" href="stylechat.css">
+    <link rel="stylesheet" href="tailwindcss-colors.css">
   </head>
 
   <body>
-    <!-- navbar -->
+    <input type="hidden" id="user_id" value="<%= user.user_id %>">
+    <input type="hidden" id="email" value="<%= user.email %>" />
+
     <div class="container">
       <nav class="navbar">
         <a class="logo" href="/index">Hong Phuong</a>
@@ -82,7 +42,12 @@
           </li>
           <%if (!locals.session.userId) { %>
           <li class="nav-item">
-            <a href="/loginform" class="nav-link book-btn">Login</a>
+            <a
+              href="
+            "
+              class="nav-link book-btn"
+              >Login</a
+            >
           </li>
           <% }else{ %>
           <li class="nav-item">
@@ -100,72 +65,229 @@
         </ul>
       </nav>
     </div>
-    <input id="user_id" value="<%= user.user_id %>" />
-    <input id="email" value="<%= user.email %>" />
-    <div class="box-chat">
-      <div class="box-title"><h1>Chat</h1></div>
-      <div class="messages-box">
-        <ul class="messages-ul"></ul>
-      </div>
 
-      <div class="input-group mb-3 message-input-div">
-        <input
-          type="text"
-          placeholder="Message"
-          class="form-control"
-          id="message-input"
-        />
+      <section class="chat-section">
+        <div class="chat-container">
+            <div class="chat-content">
+                <!-- start: Content side -->
+                <div class="content-sidebar">
+                    <div class="content-sidebar-title">Chats</div>
+                    <form action="" class="content-sidebar-form">
+                        <input type="search" class="content-sidebar-input" placeholder="Search...">
+                        <button type="submit" class="content-sidebar-submit"><i class="ri-search-line"></i></button>
+                    </form>
+                    <div class="content-messages">
+                        <ul class="content-messages-list">
+                            <li class="content-message-title"><span>Recently</span></li>
+                            <li>
+                                <a href="#" class="user-id" data-id="1" data-conversation="#conversation-1">
+                                    <img class="content-message-image" class="user-id" data-id="1" src="https://img.icons8.com/bubbles/100/000000/user.png" alt="">
+                                    <span class="content-message-info" class="user-id" data-id="1">
+                                        <span class="content-message-name" class="user-id" data-id="1">1</span>
+                                        <span class="content-message-text" class="user-id" data-id="1">New messages!</span>
+                                    </span>
+                                    <span class="content-message-more" class="user-id" data-id="1">
+                                        <span class="content-message-unread" class="user-id" data-id="1">5</span>
+                                        <span class="content-message-time" class="user-id" data-id="1">12:30</span>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- end: Content side -->
+                <!-- start: Conversation -->
+                <div class="conversation conversation-default active">
+                    <i class="ri-chat-3-line"></i>
+                    <p>Select chat and view conversation!</p>
+                </div>
+                <div class="conversation" id="conversation-1">
+                    <div class="conversation-top">
+                        <button type="button" class="conversation-back"><i class="ri-arrow-left-line"></i></button>
+                        <div class="conversation-user">
+                            <img class="conversation-user-image" src="https://img.icons8.com/bubbles/100/000000/user.png" alt="">
+                            <div>
+                                <div class="conversation-user-name">Admin
+                                </div>
+                                <div class="conversation-user-status online">online</div>
+                            </div>
+                        </div>
+                        <div class="conversation-buttons">
+                            <button type="button"><i class="ri-phone-fill"></i></button>
+                            <button type="button"><i class="ri-vidicon-line"></i></button>
+                            <button type="button"><i class="ri-information-line"></i></button>
+                        </div>
+                    </div>
+                    <div class="conversation-main">
+                        <ul class="conversation-wrapper">
+                        </ul>
+                    </div>
+                    <div class="conversation-form">
+                        <!-- <button type="button" class="conversation-form-button"><i class="ri-emotion-line"></i></button> -->
+                        <div class="conversation-form-group">
+                            <textarea class="conversation-form-input" rows="1" placeholder="Type here..." id="message-input"></textarea>
+                            <!-- <button type="button" class="conversation-form-record"><i class="ri-mic-line"></i></button> -->
+                        </div>
+                        <button type="button" class="conversation-form-button conversation-form-submit"><i class="ri-send-plane-2-line"></i></button>
+                    </div>
+                </div>
+                <!-- end: Conversation -->
+            </div>
+            <!-- end: Content -->
+          </section>
       </div>
-    </div>
+    <!-- </div> --> -->
   </body>
 
   <script
     src="https://code.jquery.com/jquery-3.6.0.min.js"
     crossorigin="anonymous"
   ></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-    crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <script src="chatscript.js"></script>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script type="text/javascript">
-    const socket = io("http://localhost:3001");
+    const IP = "<%= process.env.CHAT_IP %>";
+    const PORT = "<%= process.env.CHAT_PORT %>";
+    const socket = io(`http://${IP}:${PORT}`);
 
     socket.on("server_send_message", (msg) => {
-      $(".messages-ul").append(
-        `<li class="messages-li">${msg?.user_name}: ${msg?.message}</li>`
-      );
+      const currentChatUserId = $("#user_id").val();
+    if (msg.user_id === currentChatUserId) {
+      const messageClass = (msg?.user_name === "admin@test.com") ? "me" : "";
+      const defaultCreatedAt = new Date(); // Current time
+      const date = new Date(msg?.createdAt || defaultCreatedAt);
+
+
+    // Lấy giờ và phút từ đối tượng Date
+    const dayOfMonth = date.getDate();
+    const month = date.getMonth() + 1; // Vì getMonth() trả về giá trị từ 0 đến 11
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    // Định dạng giờ và phút thành chuỗi
+    const formattedTime =  `${dayOfMonth}/${month}/${year} ${hours}:${minutes}`;
+
+        const newConversationItem = `
+        <div class="coversation-divider"><span></span></div>
+        <li class="conversation-item ${messageClass}">
+                                <div class="conversation-item-side">
+                                    <img class="conversation-item-image" src="https://img.icons8.com/bubbles/100/000000/user.png" alt="">
+                                </div>
+                                <div class="conversation-item-content">
+                                    <div class="conversation-item-wrapper">
+                                        <div class="conversation-item-box">
+                                            <div class="conversation-item-text">
+                                                <p> ${msg?.message}</p>
+                                                <div class="conversation-item-time">${formattedTime}</div>
+                                            </div>
+                                            <div class="conversation-item-dropdown">
+                                                <button type="button" class="conversation-item-dropdown-toggle"><i class="ri-more-2-line"></i></button>
+                                                <ul class="conversation-item-dropdown-list">
+                                                    <li><a href="#"><i class="ri-share-forward-line"></i> Forward</a></li>
+                                                    <li><a href="#"><i class="ri-delete-bin-line"></i> Delete</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </li>
+        `;
+        $(".conversation-wrapper").append(newConversationItem);
+        $(".conversation-main").scrollTop($(".conversation-main").prop("scrollHeight"));
+                          }
     });
 
     const input = $("#message-input");
 
     input.keypress(function (e) {
-      if (e.which == 13) {
-        if (input.val()) {
-          socket.emit("client_send_message", {
-            user_id: $("#user_id").val(),
-            user_name: $("#email").val(),
-            message: input.val(),
-          });
-          input.val("");
+        if (e.which == 13) {
+            if (input.val()) {
+                socket.emit("client_send_message", {
+                    user_id: $("#user_id").val(),
+                    //user_name: $("#email").val(),
+                    message: input.val(),
+                });
+                input.val("");
+            }
+            return false;
+            
         }
-        return false;
-      }
     });
 
+    $(".conversation-form-button.conversation-form-submit").on("click", function() {
+      if (input.val()) {
+                socket.emit("client_send_message", {
+                    user_id: $("#user_id").val(),
+                    //user_name: $("#email").val(),
+                    message: input.val(),
+                });
+                input.val("");
+            }
+});
+
     $.ajax({
-      url:  "http://localhost:3001/messages/search?user_id=<%= user.user_id %>",
+      url: `http://${IP}:${PORT}/messages/search?user_id=<%= user.user_id %>`,
       type: "GET",
       success: function (data) {
         data?.forEach((msg) => {
-          $(".messages-ul").append(
-            `<li class="messages-li">${msg?.user_name}: ${msg?.message}</li>`
-          );
-        });
+          const messageClass = (msg?.user_name === "admin@test.com") ? "me" : "";
+          const defaultCreatedAt = new Date(); // Current time
+          const date = new Date(msg?.createdAt || defaultCreatedAt);
+
+
+// Lấy giờ và phút từ đối tượng Date
+const dayOfMonth = date.getDate();
+const month = date.getMonth() + 1; // Vì getMonth() trả về giá trị từ 0 đến 11
+const year = date.getFullYear();
+const hours = date.getHours();
+const minutes = date.getMinutes();
+
+// Định dạng giờ và phút thành chuỗi
+const formattedTime =  `${dayOfMonth}/${month}/${year} ${hours}:${minutes}`;
+
+ const newConversationItem = `
+ <div class="coversation-divider"><span></span></div>
+<li class="conversation-item ${messageClass}">
+                 <div class="conversation-item-side">
+                     <img class="conversation-item-image" src="https://img.icons8.com/bubbles/100/000000/user.png" alt="">
+                 </div>
+                 <div class="conversation-item-content">
+                     <div class="conversation-item-wrapper">
+                         <div class="conversation-item-box">
+                             <div class="conversation-item-text">
+                                 <p> ${msg?.message}</p>
+                                 <div class="conversation-item-time">${formattedTime}</div>
+                             </div>
+                             <div class="conversation-item-dropdown">
+                                 <button type="button" class="conversation-item-dropdown-toggle"><i class="ri-more-2-line"></i></button>
+                                 <ul class="conversation-item-dropdown-list">
+                                     <li><a href="#"><i class="ri-share-forward-line"></i> Forward</a></li>
+                                     <li><a href="#"><i class="ri-delete-bin-line"></i> Delete</a></li>
+                                 </ul>
+                             </div>
+                         </div>
+                     </div>
+             </li>
+`;
+$(".conversation-wrapper").append(newConversationItem);
+$(".conversation-main").scrollTop($(".conversation-main").prop("scrollHeight"));
+});
       },
     });
-</script>
-  
+  </script>
 </html>
