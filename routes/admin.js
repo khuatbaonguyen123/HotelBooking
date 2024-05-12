@@ -200,8 +200,12 @@ router.post("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
 
 router.get("/admin/reservation", isLoggedInAdmin, (req, res) => {
   let userReservation;
+  let keyword;
+  let currentPage;
   res.render("adminReservation.ejs", {
     userReservation,
+    keyword,
+    currentPage,
     message: req.flash("error"),
   });
 });
@@ -239,38 +243,72 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
 });
 
 
-router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
-  const { search } = req.body;
-  console.log(search);
-  console.log(`"${search}"`);
-  const data = await clientES.search({
-    index: 'bookingapp',
-    query: {
-      bool: {
-        should: [
-          {match: { name: `"${search}"` }},
-          {match_phrase: { date_in: `"${search}"` }},
-          {match_phrase: { date_out: `"${search}"` }},
-          {match_phrase: { status: `"${search}"` }},
-          {match_phrase: { payment_date: `"${search}"` }}
-        ]
+router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Trang hiện tại, mặc định là trang 1
+    const limit = 10; // Số lượng mục trên mỗi trang
+    const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu từ CSDL
+    let { searchby, keyword } = req.query;
+    console.log(keyword);
+    console.log(req.params, req.query, req.body);
+    console.log(`"${keyword}"`);
+    const data = await clientES.search({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          should: [
+            {match: { name: `"${keyword}"` }},
+            {match_phrase: { date_in: `"${keyword}"` }},
+            {match_phrase: { date_out: `"${keyword}"` }},
+            {match_phrase: { status: `"${keyword}"` }},
+            {match_phrase: { payment_date: `"${keyword}"` }}
+          ]
+        }
+      },
+      size: limit,
+      from: offset
+      //_source: ["account_number", "balance"]
+    })
+    let userReservation = [];
+    for(let i = 0; i < data['hits']['hits'].length; i++) {
+      console.log(data['hits']['hits'][i]['_source']);
+      userReservation.push(data['hits']['hits'][i]['_source']);
+    }
+    //let userReservation = data['hits']['hits'][0]['_source'];
+    console.log(userReservation);
+    //res.json(data['hits']['hits'][0]['_source']);
+  // Đếm tổng số lượng booking để tính số trang
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          should: [
+            {match: { name: `"${keyword}"` }},
+            {match_phrase: { date_in: `"${keyword}"` }},
+            {match_phrase: { date_out: `"${keyword}"` }},
+            {match_phrase: { status: `"${keyword}"` }},
+            {match_phrase: { payment_date: `"${keyword}"` }}
+          ]
+        }
       }
-    },
-    size: 10
-    //_source: ["account_number", "balance"]
-  })
-  let userReservation = [];
-  for(let i = 0; i < data['hits']['hits'].length; i++) {
-    console.log(data['hits']['hits'][i]['_source']);
-    userReservation.push(data['hits']['hits'][i]['_source']);
-  }
-  //let userReservation = data['hits']['hits'][0]['_source'];
-  console.log(userReservation);
-  //res.json(data['hits']['hits'][0]['_source']);
-  res.render("adminReservation.ejs", {
-      userReservation,
-      message: req.flash("error"),
-    });
+      //_source: ["account_number", "balance"]
+    })
+    const totalCount = total["count"];
+    const totalPages = Math.ceil(totalCount / limit); // Tính tổng số trang
+    // Truyền dữ liệu và thông tin phân trang vào template
+    console.log(keyword, totalPages, page);
+      res.render('adminReservation.ejs', {
+          userReservation,
+          searchby,
+          keyword,
+          totalPages,
+          currentPage: page,
+          message: req.flash("error")
+      });
+    } catch (error) {
+        console.error('Error processing dashboard:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 // router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
 //   const { search } = req.body;
