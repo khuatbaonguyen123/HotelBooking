@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../database");
 const clientES = require("../SearchEngine");
+const { search } = require("./admin");
 // const Message = require("../dbmongo");
 
 function dateFormatting(dateType) {
@@ -74,39 +75,102 @@ router.get("/admin/logout", isLoggedInAdmin, (req, res) => {
   res.redirect("/admin/login");
 });
 //DASHBOARD
-router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
-  let response1;
-  let userReservation = [];
-  try {
-    response1 = await new Promise((resolve, reject) => {
-      db.query(`select * from vDashboard`, (err, results) => {
-        if (err) reject(new Error(err.message));
-        resolve(results);
-      });
-    });
-  } catch (error) {
-    console.log(error);
-  }
+// router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
+//   let response1;
+//   let userReservation = [];
+//   try {
+//     response1 = await new Promise((resolve, reject) => {
+//       db.query(`select * from vDashboard`, (err, results) => {
+//         if (err) reject(new Error(err.message));
+//         resolve(results);
+//       });
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
 
-  let i = 0; //number of reservations
-  response1.forEach((element, index, arr) => {
-    if (index === 0 || element.id != arr[index - 1].id) {
-      userReservation.push({
-        id: element.id,
-        name: element.name,
-        phone: element.phone,
-        status: element.status,
-        date_in: dateFormatting(element.date_in),
-        date_out: dateFormatting(element.date_out),
-        description: [element.number],
+//   let i = 0; //number of reservations
+//   response1.forEach((element, index, arr) => {
+//     if (index === 0 || element.id != arr[index - 1].id) {
+//       userReservation.push({
+//         id: element.id,
+//         name: element.name,
+//         phone: element.phone,
+//         status: element.status,
+//         date_in: dateFormatting(element.date_in),
+//         date_out: dateFormatting(element.date_out),
+//         description: [element.number],
+//       });
+//       i++;
+//     } else {
+//       userReservation[i - 1].description.push(element.number);
+//     }
+//   });
+//   res.render("adminDashboard.ejs", { userReservation });
+// }); //must login to see
+
+router.get('/admin/dashboard', isLoggedInAdmin, async (req, res) => {
+  try {
+      const page = parseInt(req.query.page) || 1; // Trang hiện tại, mặc định là trang 1
+      const limit = 10; // Số lượng mục trên mỗi trang
+      const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu từ CSDL
+
+      let response1;
+      try {
+          // Lấy dữ liệu từ CSDL với giới hạn số lượng mục và vị trí bắt đầu
+          response1 = await new Promise((resolve, reject) => {
+              db.query(`SELECT * FROM vDashboard LIMIT ${limit} OFFSET ${offset}`, (err, results) => {
+                  if (err) reject(new Error(err.message));
+                  resolve(results);
+              });
+          });
+      } catch (error) {
+          console.log(error);
+          throw new Error('Error fetching data from database');
+      }
+
+      let userReservation = [];
+      // Xử lý dữ liệu nhận được từ CSDL
+      response1.forEach((element, index, arr) => {
+          const booking = {
+              id: element.id,
+              booker_id: element.booker_id,
+              name: element.name,
+              phone: element.phone,
+              date_in: dateFormatting(element.date_in),
+              date_out: dateFormatting(element.date_out),
+              description: [element.number], // Khởi tạo mảng chứa description
+          };
+
+          // Gom nhóm description theo cùng một booking id
+          if (index > 0 && element.id === arr[index - 1].id) {
+              userReservation[userReservation.length - 1].description.push(element.number);
+          } else {
+              userReservation.push(booking);
+          }
       });
-      i++;
-    } else {
-      userReservation[i - 1].description.push(element.number);
-    }
-  });
-  res.render("adminDashboard.ejs", { userReservation });
-}); //must login to see
+
+      // Đếm tổng số lượng booking để tính số trang
+      const totalCount = await new Promise((resolve, reject) => {
+          db.query('SELECT COUNT(DISTINCT id) AS totalCount FROM vDashboard', (err, results) => {
+              if (err) reject(new Error(err.message));
+              resolve(results[0].totalCount);
+          });
+      });
+
+      const totalPages = Math.ceil(totalCount / limit); // Tính tổng số trang
+
+      // Truyền dữ liệu và thông tin phân trang vào template
+      res.render('adminDashboard.ejs', {
+          userReservation,
+          totalPages,
+          currentPage: page
+      });
+  } catch (error) {
+      console.error('Error processing dashboard:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
 
 router.post("/admin/accept/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
@@ -137,8 +201,14 @@ router.post("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
 
 router.get("/admin/reservation", isLoggedInAdmin, (req, res) => {
   let userReservation;
+  let keyword;
+  let searchby = "default";
+  let currentPage;
   res.render("adminReservation.ejs", {
     userReservation,
+    searchby,
+    keyword,
+    currentPage,
     message: req.flash("error"),
   });
 });
@@ -175,87 +245,261 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
   });
 });
 
-
-router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
-  const { search } = req.body;
-  console.log(search);
-  console.log(`"${search}"`);
-  const data = await clientES.search({
-    index: 'bookingapp',
-    query: {
-      bool: {
-        should: [
-          {match: { name: `"${search}"` }},
-          {match_phrase: { date_in: `"${search}"` }},
-          {match_phrase: { date_out: `"${search}"` }},
-          {match_phrase: { status: `"${search}"` }},
-          {match_phrase: { payment_date: `"${search}"` }}
-        ]
+function getReservationData (searchby, keyword, limit, offset) {
+  return new Promise(async (resolve, reject) => {
+    if(searchby == 'default') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            should: [
+              {match: { name: `"${keyword}"` }},
+              {match_phrase: { date_in: `"${keyword}"` }},
+              {match_phrase: { date_out: `"${keyword}"` }},
+              {match_phrase: { description: keyword }},
+              {match_phrase: { status: `"${keyword}"` }},
+              {match_phrase: { payment_date: `"${keyword}"` }}
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
       }
-    },
-    size: 10
-    //_source: ["account_number", "balance"]
-  })
-  let userReservation = [];
-  for(let i = 0; i < data['hits']['hits'].length; i++) {
-    console.log(data['hits']['hits'][i]['_source']);
-    userReservation.push(data['hits']['hits'][i]['_source']);
-  }
-  //let userReservation = data['hits']['hits'][0]['_source'];
-  console.log(userReservation);
-  //res.json(data['hits']['hits'][0]['_source']);
-  res.render("adminReservation.ejs", {
-      userReservation,
-      message: req.flash("error"),
-    });
-});
-// router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
-//   const { search } = req.body;
-//   let record;
-//   let userReservation;
-//   if (!isNaN(search) && search) {
-//     try {
-//       record = await new Promise((resolve, reject) => {
-//         db.query(
-//           `select * from vReservation where id = ${search};`,
-//           (err, results) => {
-//             if (err) reject(new Error(err.message));
-//             resolve(results);
-//           }
-//         );
-//       });
-//     } catch (error) {
-//       console.log(error);
-//     }
+      resolve(userReservation);
+    } else if (searchby == 'id') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { bid: keyword }}
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if (searchby == 'name') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { name: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if(searchby == 'datein') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { date_in: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if(searchby == 'dateout') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { date_out: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    }  else if(searchby == 'rooms') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { description: keyword }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    } else if(searchby == 'status') {
+      const data = await clientES.search({
+        index: 'bookingapp',
+        query: {
+          bool: {
+            must: [
+              {match: { status: `"${keyword}"` }},
+            ]
+          }
+        },
+        size: limit,
+        from: offset
+      })
+      let userReservation = [];
+      for(let i = 0; i < data['hits']['hits'].length; i++) {
+        userReservation.push(data['hits']['hits'][i]['_source']);
+      }
+      resolve(userReservation);
+    }
+  });
+}
 
-//     if (record.length > 0) {
-//       record.forEach((element, index, arr) => {
-//         if (index === 0 || element.id != arr[index - 1].id) {
-//           userReservation = {
-//             id: element.id,
-//             booker_id: element.booker_id,
-//             name: element.name,
-//             phone: element.phone,
-//             date_in: dateFormatting(element.date_in),
-//             date_out: dateFormatting(element.date_out),
-//             description: [element.number],
-//             status: element.status,
-//             price: element.total_price,
-//             payment_date: dateFormatting(element.payment_date),
-//           };
-//         } else {
-//           userReservation.description.push(element.number);
-//         }
-//       });
-//     } else {
-//       req.flash("error", "ID not found");
-//     }
-//   }
-//   res.render("adminReservation.ejs", {
-//     userReservation,
-//     message: req.flash("error"),
-//   });
-// });
+function getTotalCount(searchby, keyword) {
+  return new Promise(async (resolve, reject) => {
+    if(searchby == 'default') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          should: [
+            {match: { name: `"${keyword}"` }},
+            {match_phrase: { date_in: `"${keyword}"` }},
+            {match_phrase: { date_out: `"${keyword}"` }},
+            {match_phrase: { description: keyword }},
+            {match_phrase: { status: `"${keyword}"` }},
+            {match_phrase: { payment_date: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'id') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { bid: keyword }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'name') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { name: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'datein') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { date_in: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'dateout') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { date_out: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  }  else if(searchby == 'rooms') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { description: keyword }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  } else if(searchby == 'status') {
+    const total = await clientES.count({
+      index: 'bookingapp',
+      query: {
+        bool: {
+          must: [
+            {match: { status: `"${keyword}"` }}
+          ]
+        }
+      }
+    })
+    resolve(total["count"]);
+  }
+  })
+}
+router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // Trang hiện tại, mặc định là trang 1
+    const limit = 10; // Số lượng mục trên mỗi trang
+    const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu từ CSDL
+    let { searchby, keyword } = req.query;
+    const userReservation = await getReservationData(searchby, keyword, limit, offset);
+    //console.log(userReservation);
+    const totalCount = await getTotalCount(searchby, keyword);
+    const totalPages = Math.ceil(totalCount / limit); // Tính tổng số trang
+    // Truyền dữ liệu và thông tin phân trang vào template
+      res.render('adminReservation.ejs', {
+          userReservation,
+          searchby,
+          keyword,
+          totalPages,
+          currentPage: page,
+          message: req.flash("error")
+      });
+    } catch (error) {
+        console.error('Error processing dashboard:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 router.post("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
@@ -345,38 +589,6 @@ router.get("/admin/rooms", isLoggedInAdmin, (req, res) => {
     }
   );
 });
-
-// router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
-//   const { id } = req.params;
-//   console.log(id);
-//   db.query(`delete from room where id = '${id}'`, (err, room) => {
-//     if (err) throw err;
-//     else {
-//       console.log(room);
-//       res.redirect("/admin/rooms");
-//     }
-//   });
-// });
-
-// router.post("/admin/editRoom", isLoggedInAdmin, (req, res) => {
-//   const { id } = req.query;
-//   console.log(id);
-//   db.query(
-//     `select *
-//             from facilities f
-//             where f.room_id=${id}`,
-//     (err, data) => {
-//       if (err) {
-//         throw err;
-//       }
-//       console.log(data);
-//       if (data) {
-//         //user exists in database
-//         res.render("adminEditRoom.ejs", { data, message: req.flash("error") });
-//       } else res.redirect("/admin/rooms");
-//     }
-//   );
-// });
 
 router.post("/admin/roomlist", isLoggedInAdmin, (req, res) => {
   const { id } = req.query;
