@@ -20,15 +20,21 @@
     "ejs": "^3.1.9",
     "express": "^4.19.0",
     "express-session": "^1.17.3",
+    "faker": "^6.6.6",
     "ioredis": "^5.3.2",
+    "kafkajs": "^2.2.4",
     "mongodb": "^6.5.0",
     "mongoose": "^8.3.0",
     "mysql": "^2.18.1",
+    "mysql2": "^3.9.7",
     "node-cron": "^3.0.3",
     "nodemon": "^2.0.20",
     "puppeteer": "^22.6.5",
     "redis": "^4.6.13",
     "socket.io": "^4.7.5",
     "socketio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1"
   }
 }

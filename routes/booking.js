@@ -237,22 +237,22 @@ function isAvailable (req, res, next){
     const departureDate = req.body.departureDate;
     const roomNumber = req.body.rooms;
     console.log(arrivalDate, departureDate);
-    roomNumber.forEach(element => {
-        console.log(element + '*');
-        let query = `select * from vreservation
-                    where number = ${element} and 
-                    (status != 'checkout' and status != 'decline') and 
-                    (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
-                    ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
-        console.log(query);
-        db.query(query, (err, result) => {
-            if(err) req.flash('errors', errors);
-            if (result.length > 0) {
-                res.json(`Room ${element} is not available`);
-            }
-        });
-    });
-    next();
+    let query = `select * from vreservation
+            where number = ${roomNumber} and 
+            (status != 'checkout' and status != 'decline') and 
+            (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
+            ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
+    console.log(query);
+    db.query(query, (err, result) => {
+                console.log(err);
+                console.log(result);
+                if (result && result.length > 0) {
+                    res.json('Room is not available');
+                }
+                else{
+                    next();
+                }
+            });
 }
 
 router.post('/roomSelect',isLoggedIn, isAvailable, async (req, res) => {
