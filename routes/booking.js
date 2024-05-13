@@ -246,7 +246,7 @@ function isAvailable (req, res, next){
     db.query(query, (err, result) => {
                 console.log(err);
                 console.log(result);
-                if (result.length > 0) {
+                if (result && result.length > 0) {
                     res.json('Room is not available');
                 }
                 else{

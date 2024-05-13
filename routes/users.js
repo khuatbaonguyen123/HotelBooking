@@ -62,50 +62,62 @@ router.post('/signup', async (req, res) => {
             let checkPassword = await getCheckLink(password);
             console.log(checkPassword);
             if ((checkPassword === "Not Link" || checkPassword === "Safe")) {
-                db.beginTransaction((err) => {
-                    if (err) throw err;
-                    db.query(`SELECT * FROM booker WHERE email='${email}'`, (err, results) => {
-                        if (err) {
-                            db.rollback(() => {
+                db.getConnection((err, connection) => {
+                    if (err) {
+                        throw err;
+                    } else {
+                        connection.beginTransaction((err) => {
+                            if (err) {
+                                connection.release();
                                 throw err;
-                            });
-                        }
-                        if (results.length > 0) {
-                            req.flash('error', 'Email already registered');
-                            res.redirect('/signupform');
-                            db.rollback();
-                        } else {
-                            db.query(`INSERT INTO booker (email, password, first_name, last_name, phone, birth_date) VALUES ('${email}', '${hashedPassword}', '${fname}', '${lname}', '${phone}', '${dob}')`, (err) => {
+                            }
+                            connection.query(`SELECT * FROM booker WHERE email='${email}'`, (err, results) => {
                                 if (err) {
-                                    db.rollback(() => {
+                                    connection.rollback(() => {
+                                        connection.release();
                                         throw err;
                                     });
                                 }
-                                db.commit((err) => {
-                                    if (err) {
-                                        db.rollback(() => {
-                                            throw err;
+                                if (results.length > 0) {
+                                    req.flash('error', 'Email already registered');
+                                    res.redirect('/signupform');
+                                    connection.rollback(() => {
+                                        connection.release();
+                                    });
+                                } else {
+                                    connection.query(`INSERT INTO booker( email, password, first_name, last_name, birth_date, phone) VALUES ('${email}', '${hashedPassword}', '${fname}','${lname}','${dob}','${phone}')`, (err) => {
+                                        if (err) {
+                                            connection.rollback(() => {
+                                                connection.release();
+                                                throw err;
+                                            });
+                                        }
+                                        connection.commit((err) => {
+                                            if (err) {
+                                                connection.rollback(() => {
+                                                    connection.release();
+                                                    throw err;
+                                                });
+                                            }
+                                            connection.release();
+                                            res.redirect('/init_redis');
                                         });
-                                    }
-                                    res.redirect('/init_redis');
-                                });
+                                    });
+                                }
                             });
-                        }
-                    });
+                        });
+                    }
                 });
-            }
-            else {
+            } else {
                 return res.status(400).json({ error: 'Password not valid.' });
             }
-        }
-        else {
+        } else {
             return res.status(400).json({ error: 'last name not valid.' });
         }
-    }
-    else {
+    } else {
         return res.status(400).json({ error: 'First name not valid.' });
     }
-})
+});
 
 
 router.get('/init_redis', (req,res) =>{

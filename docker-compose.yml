@@ -44,6 +44,95 @@ services:
     networks:
       - hotelbooking
   
+  mysql:
+    container_name: mysql8
+    image: mysql:8.0
+    # command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bookingapp
+      # MYSQL_USER: root
+      # MYSQL_PASSWORD: root
+      # MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - '5001:3306'
+    volumes:
+      -  /etc/docker/mysql:/etc/mysql/conf.d
+    #   - './docker/db/data:/var/lib/mysql'
+    #   - './docker/db/my.cnf:/etc/mysql/conf.d/my.cnf'
+    #   - './docker/db/sql:/docker-entrypoint-initdb.d'
+    networks:
+      - hotelbooking
+
+  zookeeper:
+    container_name: zookeeper
+    image: debezium/zookeeper
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+    networks:
+      - hotelbooking
+  kafka:
+    container_name: kafka
+    image: debezium/kafka
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    environment:
+      ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: EXTERNAL_SAME_HOST://:29092,INTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL_SAME_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_SAME_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    networks:
+      - hotelbooking
+  
+  connect:
+    container_name: connect
+    image: debezium/connect
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+      - zookeeper
+      - mysql
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+      - ENABLE_DEBEZIUM_KC_REST_EXTENSION=true
+      - ENABLE_DEBEZIUM_SCRIPTING=true
+      - CONNECT_REST_EXTENSION_CLASSES=io.debezium.kcrestextension.DebeziumConnectRestExtension
+      - ADVERTISED_HOST_NAME=localhost
+    networks:
+      - hotelbooking
+      
+  # debezium-ui:
+  #   container_name: debezium-ui
+  #   image: debezium/debezium-ui
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - KAFKA_CONNECT_URIS=http://connect:8083
+  #   depends_on:
+  #     - connect
+  #   networks:
+  #     - hotelbooking
+
+  # watcher:
+  #   image: debezium/kafka
+  #   container_name: watcher
+  #   command: watch-topic -a -k dbserver1.bookingapp.booker
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka
+  #   networks:
+  #     - hotelbooking
 
 volumes:
   mongo-0-a:
