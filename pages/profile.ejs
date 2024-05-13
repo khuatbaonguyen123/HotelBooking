@@ -6,9 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="detail.css">
+
 </head>
 
 <body>
@@ -48,63 +53,211 @@
 
     <section class="contact" align="center">
         <div class="container">
+            <div class="row">
+                <div class="col-2">
+                    <img src="https://img.icons8.com/bubbles/100/000000/user.png" class="img-radius" style = "position:relative; left:290px;" alt="User-Profile-Image">
+                    <div style = "position:relative; left:290px;">
+                        <h3>First name</h3>
+                        <p><%= userData.first_name%></p> <!-- insert data here -->
+                    </div>
+                    <div style = "position:relative; left:290px;">
+                        <h3>Last name</h3>
+                        <p><%= userData.last_name%></p>
+                    </div>
+                    <div style = "position:relative; left:290px;">
+                        <h3>Email</h3>
+                        <p><%= userData.email%></p>
+                    </div>
+                    <div style = "position:relative; left:290px;">
+                        <h3>Date of birth</h3>
+                        <% function dateFormatting(dateType){
+                            let date = dateType.getDate();
+                            let month = dateType.getMonth()+1;
+                            let year= dateType.getFullYear();
+                            const dateFormat = [(date>9 ? '' : '0') + date,(month>9 ? '' : '0') + month,year].join('/');
+                            return dateFormat;
+                        } %>
+                        <p><%= dateFormatting(userData.birth_date) %></p>
+                    </div>
+                    <div style = "position:relative; left:290px;">
+                        <h3>Phone</h3>
+                        <p><%= userData.phone%></p>
+                    </div>
+                </div>
+            </div>
             <div class="col-2">
-                <img src="https://img.icons8.com/bubbles/100/000000/user.png" class="img-radius"  alt="User-Profile-Image">
-                <div >
-                    <h3>First name</h3>
-                    <p><%= userData.first_name%></p> <!-- insert data here -->
-                </div>
-                <div >
-                    <h3>Last name</h3>
-                    <p><%= userData.last_name%></p>
-                </div>
-                <div >
-                    <h3>Email</h3>
-                    <p><%= userData.email%></p>
-                </div>
-                <div >
-                    <h3>Date of birth</h3>
-                    <% function dateFormatting(dateType){
-                        let date = dateType.getDate();
-                        let month = dateType.getMonth()+1;
-                        let year= dateType.getFullYear();
-                        const dateFormat = [(date>9 ? '' : '0') + date,(month>9 ? '' : '0') + month,year].join('/');
-                        return dateFormat;
-                    } %>
-                    <p><%= dateFormatting(userData.birth_date) %></p>
-                </div>
-                <div >
-                    <h3>Phone</h3>
-                    <p><%= userData.phone%></p>
-                </div>
                 <h3>Booking History</h3>
                 <br><br>
                 <table>
                     <thead> 
                         <tr style="font-size: 20px; color: aliceblue;"> 
+                            <th>STT</th>
                             <th>ID</th>
+                            <th>Type room</th>
                             <th>Room number</th>
                             <th>Arrival Date</th>
                             <th>Departure Date</th>
                             <th>Status</th>
+                            <th>Rating</th>
                         </tr>
                     </thead> 
                     <tbody>
-                        <% userReservation.forEach(element =>{ %>
+                        <% userReservation.forEach(element => { %>
                             <tr>
-                                <td data-label="ID" style="font-size: 20px; color: aliceblue;"><%= element.reservation_id %></td> <!--insert into row values -->
+                                <td data-label="STT" style="font-size: 20px; color: aliceblue;"><%= element.cnt %></td>
+                                <td data-label="ID" style="font-size: 20px; color: aliceblue;"><%= element.reservation_id %></td>
+                                <td data-label="Type room" style="font-size: 20px; color: aliceblue;"><%= element.typeRoom %></td>
                                 <td data-label="RoomNum" style="font-size: 20px; color: aliceblue;"><%= element.roomList %></td>
                                 <td data-label="Arrival date" style="font-size: 20px; color: aliceblue;"><%= dateFormatting(element.date_in) %></td>
                                 <td data-label="Departure Date" style="font-size: 20px; color: aliceblue;"><%= dateFormatting(element.date_out) %></td>
                                 <td data-label="Status" style="font-size: 20px; color: aliceblue;"><%= element.status %></td>
+                                <td>
+                                    <% if (element.status === "checkout") { %>
+                                        <button type="button" onclick=" showRating(<%= element.typeRoom %>, <%= element.reservation_id %>)" style="background-color: #ff0400; cursor: pointer; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 16px;">
+                                            Rating
+                                        </button>
+
+                                        <div id="ratingBox" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgb(255, 241, 241); padding: 10px; border: 1px solid black; width: 600px; max-height: 500px;">
+                                            <div class="post">
+                                                <div class="text">Thanks for rating us!</div>
+                                                <div class="edit">
+                                                    <p id="typeRoom"></p>
+                                                    <p id="numberRoom"></p>
+                                                </div>
+                                            </div>
+                        
+                                            <form method="POST" action = "/rate">
+                                                <input type="hidden" id="typeRoomInput" name="typeRoom" value="">
+                                                <input type="hidden" id="numberRoomInput" name="numberRoom" value="">
+                                                <div class="star-widget" >
+                                                    <div class="rating">
+                                                        <input type="hidden" name="rating" id="rating-input" value="0">
+                                                            <i class='bx bx-star star' style="--i: 0;"></i>
+                                                            <i class='bx bx-star star' style="--i: 1;"></i>
+                                                            <i class='bx bx-star star' style="--i: 2;"></i>
+                                                            <i class='bx bx-star star' style="--i: 3;"></i>
+                                                            <i class='bx bx-star star' style="--i: 4;"></i>
+                                                    
+                                                </div>
+                                                    <div class="textarea" >
+                                                        <textarea name = "comment" cols="15" placeholder="Describe your experience.." style="color: black;"></textarea>
+                                                    </div>   
+                                                </div>
+                                                <div >
+                                                    <button  type="submit" style="
+                                                    cursor: pointer; 
+                                                    margin-right: 50px;
+                                                    background-color: #6896f1;                                         
+                                                    padding: 10px 20px;
+                                                    border: none;
+                                                    border-radius: 4px;
+                                                    font-size: 22px;
+                                                    " onclick="hideRating()" >Submit</button>
+                                                    <buttontype="cancel" onclick="hideRating()" style="cursor: pointer; 
+                                                    background-color: #878d9b;                                         
+                                                    padding: 10px 20px;
+                                                    border: none;
+                                                    border-radius: 4px;
+                                                    font-size: 22px;">Cancel</button>
+                                                </div>
+                                            </form>   
+                                        </div>
+
+                                        
+                                    <% } else { %>
+                                        <button  style="background-color: #721311; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 16px;">
+                                            Rating
+                                        </button>
+                                    <% } %>
+                                </td>
                             </tr>
-                        <% }) %>
+
+                            
+                        <% }); %>
+                        
                     </tbody>
                 </table>
-            </div>
+               
+                </div>
             <a href="/editProfile?id=<%= userData.id %>"><button class="nav-link book-btn" style="cursor: pointer;">Edit profile</button></a>
             <a href="/editPassword?id=<%= userData.id %>"><button class="nav-link book-btn" style="cursor: pointer;">Edit password</button></a>
         </div>
+        
+        <script>
+           
+
+            const allStar = document.querySelectorAll('.rating .star')
+            const ratingValue = document.querySelector('.rating input')
+
+        allStar.forEach((item, idx)=> {
+        item.addEventListener('click', function () {
+            let click = 0
+            ratingValue.value = idx + 1
+
+            allStar.forEach(i=> {
+                i.classList.replace('bxs-star', 'bx-star')
+                i.classList.remove('active')
+            })
+            for(let i=0; i<allStar.length; i++) {
+                if(i <= idx) {
+                    allStar[i].classList.replace('bx-star', 'bxs-star')
+                    allStar[i].classList.add('active')
+                } else {
+                    allStar[i].style.setProperty('--i', click)
+                    click++
+                }
+            }
+        })
+    })
+
+            const btn = document.querySelector("button");
+            const post = document.querySelector(".post");
+            const widget = document.querySelector(".star-widget");
+            const editBtn = document.querySelector(".edit");
+            const comment = document.querySelector(".textarea");
+            btn.onclick = ()=>{
+              widget.style.display = "none";
+              post.style.display = "block";
+              comment.style.display = "block";
+              editBtn.onclick = ()=>{
+                widget.style.display = "block";
+                post.style.display = "none";
+              }
+              return false;
+            }
+            
+            </script>
+        <script>
+            function showRating(typeRoom, roo) {
+
+                document.getElementById("ratingBox").style.display = "block";
+                document.getElementById("typeRoomInput").value = typeRoom; // Set giá trị cho trường ẩn typeRoom
+                document.getElementById("numberRoomInput").value = roo;
+                document.getElementById("textarea").style.display = "block";
+                document.getElementById("overlay").style.display = "block";
+                
+        
+            }
+            function set(cnt) {
+                var id = get(cnt)
+                console.log(id)
+            }
+            function get(cnt){
+                return {id: cnt};
+            }
+
+            function getstt(id) {
+                return {cnt: id};
+            }
+
+    function hideRating() {
+        // Ẩn hộp bình luận
+        document.getElementById("ratingBox").style.display = "none";
+        // Ẩn lớp che
+        document.getElementById("overlay").style.display = "none";
+    }
+        </script>
+        
     </section>
     <footer>
         <div class="container">

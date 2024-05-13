@@ -60,7 +60,7 @@ async function getRoomsOfType(roomType, arrivalDate, departureDate) {
                         WHERE reservation_id IN(
                             SELECT id
                             FROM reservation
-                            WHERE (status = 'accept' OR status = 'pending' OR status = 'checkin') AND ((date_in <= ? AND ? < date_out) OR (date_in < ? AND ? <= date_out) OR (? < date_in AND date_out < ?))
+                            WHERE (status = 'accept' OR status = 'checkin') AND ((date_in <= ? AND ? < date_out) OR (date_in < ? AND ? <= date_out) OR (? < date_in AND date_out < ?))
                         )
                     )`, [roomType, arrivalDate, arrivalDate, departureDate, departureDate, arrivalDate, departureDate], (err, results) => {
                 if (err) reject(new Error(err.message));

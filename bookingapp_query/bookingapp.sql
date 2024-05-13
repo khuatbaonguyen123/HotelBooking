@@ -40,7 +40,7 @@ CREATE TABLE reservation (
   date_in date,
   date_out date,
   booker_id int,
-  status enum('accept','decline','pending','checkin','checkout') default 'pending', 
+  status enum('accept','decline','checkin','checkout') default 'accpet', 
   CONSTRAINT FK_rever_bookerid FOREIGN KEY (booker_id) references booker(id)
 );
 
@@ -155,7 +155,7 @@ where b.id = re.booker_id and re.id=p.reservation_id and r.reservation_id = re.i
 create view vDashboard as
 select re.id,b.id as booker_id,concat(b.first_name,' ',b.last_name) as name,b.phone,re.date_in,re.date_out,room.number,re.status,total_price,payment_date 
 from reservation as re, booker as b,payment as p,room_reserved as r, room
-where b.id = re.booker_id and re.id=p.reservation_id and r.reservation_id = re.id and room.id = r.room_id and re.status = 'pending';
+where b.id = re.booker_id and re.id=p.reservation_id and r.reservation_id = re.id and room.id = r.room_id and (re.status = 'accept' or re.status = 'checkin' or re.status = 'checkout');
     
 create view vroomlist as
 select room.id, room.number, room.type_id, 

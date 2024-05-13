@@ -12,13 +12,15 @@ const generalRouter = require('./routes/general');
 const bookingRouter = require('./routes/booking');
 const adminRouter = require('./routes/admin');
 const chatRouter = require('./routes/chatting');
+const rateRouter = require('./routes/rate');
 
 
-const ratingRouter = require('./routes/rating');
+const { startDatabaseBackup } = require('./mysqldump');
+
 
 const app = express();
 
-
+startDatabaseBackup();
 mongoose.connect(process.env.MONGOLOCAL_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -71,7 +73,7 @@ app.use(usersRouter);
 app.use(bookingRouter);
 app.use(adminRouter);
 app.use(chatRouter);
-app.use(ratingRouter);
+app.use(rateRouter);
 
 
 app.get('/get-session', (req, res) =>{
