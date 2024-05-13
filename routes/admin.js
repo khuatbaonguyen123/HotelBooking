@@ -74,40 +74,6 @@ router.get("/admin/logout", isLoggedInAdmin, (req, res) => {
   req.session.destroy();
   res.redirect("/admin/login");
 });
-//DASHBOARD
-// router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
-//   let response1;
-//   let userReservation = [];
-//   try {
-//     response1 = await new Promise((resolve, reject) => {
-//       db.query(`select * from vDashboard`, (err, results) => {
-//         if (err) reject(new Error(err.message));
-//         resolve(results);
-//       });
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-
-//   let i = 0; //number of reservations
-//   response1.forEach((element, index, arr) => {
-//     if (index === 0 || element.id != arr[index - 1].id) {
-//       userReservation.push({
-//         id: element.id,
-//         name: element.name,
-//         phone: element.phone,
-//         status: element.status,
-//         date_in: dateFormatting(element.date_in),
-//         date_out: dateFormatting(element.date_out),
-//         description: [element.number],
-//       });
-//       i++;
-//     } else {
-//       userReservation[i - 1].description.push(element.number);
-//     }
-//   });
-//   res.render("adminDashboard.ejs", { userReservation });
-// }); //must login to see
 
 router.get('/admin/dashboard', isLoggedInAdmin, async (req, res) => {
   try {
@@ -140,6 +106,7 @@ router.get('/admin/dashboard', isLoggedInAdmin, async (req, res) => {
               date_in: dateFormatting(element.date_in),
               date_out: dateFormatting(element.date_out),
               description: [element.number], // Khởi tạo mảng chứa description
+              status: element.status
           };
 
           // Gom nhóm description theo cùng một booking id
@@ -245,34 +212,54 @@ router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
   });
 });
 
+router.get("/admin/test", isLoggedInAdmin, async (req, res) => {
+  const keyword = '1';
+  var query = {
+    query: {
+      bool: {
+        should: [
+          {match: { name: `"${keyword}"` }},
+          {match_phrase: { date_in: `"${keyword}"` }},
+          {match_phrase: { date_out: `"${keyword}"` }},
+          {match_phrase: { status: `"${keyword}"` }},
+          {match_phrase: { payment_date: `"${keyword}"` }}
+        ]
+      }
+    },
+  };
+  
+  var response = await clientES.count({
+    index: 'bookingapp',
+    body: query
+  });
+  console.log(response.body.count);
+  // let data = response.body.hits.hits;
+  // console.log(response.body.hits.hits);
+  // console.log('hihi');
+  // for(let i = 0; i < data.length; i++) {
+  //   console.log(data[i]);
+  // }
+});
+
 function getReservationData (searchby, keyword, limit, offset) {
+  var OSquery;
   return new Promise(async (resolve, reject) => {
     if(searchby == 'default') {
-      const data = await clientES.search({
-        index: 'bookingapp',
+      OSquery = {
         query: {
           bool: {
             should: [
               {match: { name: `"${keyword}"` }},
               {match_phrase: { date_in: `"${keyword}"` }},
               {match_phrase: { date_out: `"${keyword}"` }},
-              {match_phrase: { description: keyword }},
               {match_phrase: { status: `"${keyword}"` }},
               {match_phrase: { payment_date: `"${keyword}"` }}
             ]
           }
         },
-        size: limit,
-        from: offset
-      })
-      let userReservation = [];
-      for(let i = 0; i < data['hits']['hits'].length; i++) {
-        userReservation.push(data['hits']['hits'][i]['_source']);
-      }
-      resolve(userReservation);
+      };
     } else if (searchby == 'id') {
-      const data = await clientES.search({
-        index: 'bookingapp',
+      OSquery = {
         query: {
           bool: {
             must: [
@@ -280,53 +267,29 @@ function getReservationData (searchby, keyword, limit, offset) {
             ]
           }
         },
-        size: limit,
-        from: offset
-      })
-      let userReservation = [];
-      for(let i = 0; i < data['hits']['hits'].length; i++) {
-        userReservation.push(data['hits']['hits'][i]['_source']);
-      }
-      resolve(userReservation);
+      };
     } else if (searchby == 'name') {
-      const data = await clientES.search({
-        index: 'bookingapp',
+      OSquery = {
         query: {
           bool: {
             must: [
-              {match: { name: `"${keyword}"` }},
+              {match: { name: `"${keyword}"` }}
             ]
           }
         },
-        size: limit,
-        from: offset
-      })
-      let userReservation = [];
-      for(let i = 0; i < data['hits']['hits'].length; i++) {
-        userReservation.push(data['hits']['hits'][i]['_source']);
-      }
-      resolve(userReservation);
+      };
     } else if(searchby == 'datein') {
-      const data = await clientES.search({
-        index: 'bookingapp',
+      OSquery = {
         query: {
           bool: {
             must: [
-              {match: { date_in: `"${keyword}"` }},
+              {match: { date_in: `"${keyword}"` }}
             ]
           }
-        },
-        size: limit,
-        from: offset
-      })
-      let userReservation = [];
-      for(let i = 0; i < data['hits']['hits'].length; i++) {
-        userReservation.push(data['hits']['hits'][i]['_source']);
-      }
-      resolve(userReservation);
+        }
+      };
     } else if(searchby == 'dateout') {
-      const data = await clientES.search({
-        index: 'bookingapp',
+      OSquery = {
         query: {
           bool: {
             must: [
@@ -334,17 +297,9 @@ function getReservationData (searchby, keyword, limit, offset) {
             ]
           }
         },
-        size: limit,
-        from: offset
-      })
-      let userReservation = [];
-      for(let i = 0; i < data['hits']['hits'].length; i++) {
-        userReservation.push(data['hits']['hits'][i]['_source']);
-      }
-      resolve(userReservation);
+      };
     }  else if(searchby == 'rooms') {
-      const data = await clientES.search({
-        index: 'bookingapp',
+      OSquery = {
         query: {
           bool: {
             must: [
@@ -352,17 +307,9 @@ function getReservationData (searchby, keyword, limit, offset) {
             ]
           }
         },
-        size: limit,
-        from: offset
-      })
-      let userReservation = [];
-      for(let i = 0; i < data['hits']['hits'].length; i++) {
-        userReservation.push(data['hits']['hits'][i]['_source']);
-      }
-      resolve(userReservation);
+      };
     } else if(searchby == 'status') {
-      const data = await clientES.search({
-        index: 'bookingapp',
+      OSquery = {
         query: {
           bool: {
             must: [
@@ -370,110 +317,108 @@ function getReservationData (searchby, keyword, limit, offset) {
             ]
           }
         },
-        size: limit,
-        from: offset
-      })
-      let userReservation = [];
-      for(let i = 0; i < data['hits']['hits'].length; i++) {
-        userReservation.push(data['hits']['hits'][i]['_source']);
-      }
-      resolve(userReservation);
+      };
     }
+    var response = await clientES.search({
+      index: 'bookingapp',
+      body: OSquery,
+      size: limit,
+      from: offset
+    });
+    let data = response.body.hits.hits;
+    let userReservation = [];
+    for(let i = 0; i < data.length; i++) {
+      userReservation.push(data[i]._source);
+    }
+    console.log(userReservation);
+    resolve(userReservation);
   });
 }
 
 function getTotalCount(searchby, keyword) {
   return new Promise(async (resolve, reject) => {
     if(searchby == 'default') {
-    const total = await clientES.count({
+      console.log(keyword);
+      console.log("hello");
+      OSquery = {
+        query: {
+          bool: {
+            should: [
+              {match: { name: `"${keyword}"` }},
+              {match_phrase: { date_in: `"${keyword}"` }},
+              {match_phrase: { date_out: `"${keyword}"` }},
+              {match_phrase: { status: `"${keyword}"` }},
+              {match_phrase: { payment_date: `"${keyword}"` }}
+            ]
+          }
+        },
+      };
+    } else if (searchby == 'id') {
+      OSquery = {
+        query: {
+          bool: {
+            must: [
+              {match: { bid: keyword }}
+            ]
+          }
+        },
+      };
+    } else if (searchby == 'name') {
+      OSquery = {
+        query: {
+          bool: {
+            must: [
+              {match: { name: `"${keyword}"` }},
+            ]
+          }
+        },
+      };
+    } else if(searchby == 'datein') {
+      OSquery = {
+        query: {
+          bool: {
+            must: [
+              {match: { date_in: `"${keyword}"` }},
+            ]
+          }
+        },
+      };
+    } else if(searchby == 'dateout') {
+      OSquery = {
+        query: {
+          bool: {
+            must: [
+              {match: { date_out: `"${keyword}"` }},
+            ]
+          }
+        },
+      };
+    }  else if(searchby == 'rooms') {
+      OSquery = {
+        query: {
+          bool: {
+            must: [
+              {match: { description: keyword }},
+            ]
+          }
+        },
+      };
+    } else if(searchby == 'status') {
+      OSquery = {
+        query: {
+          bool: {
+            must: [
+              {match: { status: `"${keyword}"` }},
+            ]
+          }
+        },
+      };
+    }
+    var response = await clientES.count({
       index: 'bookingapp',
-      query: {
-        bool: {
-          should: [
-            {match: { name: `"${keyword}"` }},
-            {match_phrase: { date_in: `"${keyword}"` }},
-            {match_phrase: { date_out: `"${keyword}"` }},
-            {match_phrase: { description: keyword }},
-            {match_phrase: { status: `"${keyword}"` }},
-            {match_phrase: { payment_date: `"${keyword}"` }}
-          ]
-        }
-      }
-    })
-    resolve(total["count"]);
-  } else if(searchby == 'id') {
-    const total = await clientES.count({
-      index: 'bookingapp',
-      query: {
-        bool: {
-          must: [
-            {match: { bid: keyword }}
-          ]
-        }
-      }
-    })
-    resolve(total["count"]);
-  } else if(searchby == 'name') {
-    const total = await clientES.count({
-      index: 'bookingapp',
-      query: {
-        bool: {
-          must: [
-            {match: { name: `"${keyword}"` }}
-          ]
-        }
-      }
-    })
-    resolve(total["count"]);
-  } else if(searchby == 'datein') {
-    const total = await clientES.count({
-      index: 'bookingapp',
-      query: {
-        bool: {
-          must: [
-            {match: { date_in: `"${keyword}"` }}
-          ]
-        }
-      }
-    })
-    resolve(total["count"]);
-  } else if(searchby == 'dateout') {
-    const total = await clientES.count({
-      index: 'bookingapp',
-      query: {
-        bool: {
-          must: [
-            {match: { date_out: `"${keyword}"` }}
-          ]
-        }
-      }
-    })
-    resolve(total["count"]);
-  }  else if(searchby == 'rooms') {
-    const total = await clientES.count({
-      index: 'bookingapp',
-      query: {
-        bool: {
-          must: [
-            {match: { description: keyword }}
-          ]
-        }
-      }
-    })
-    resolve(total["count"]);
-  } else if(searchby == 'status') {
-    const total = await clientES.count({
-      index: 'bookingapp',
-      query: {
-        bool: {
-          must: [
-            {match: { status: `"${keyword}"` }}
-          ]
-        }
-      }
-    })
-    resolve(total["count"]);
-  }
+      body: OSquery
+    });
+    resolve(response.body.count);
   })
 }
 router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
@@ -482,6 +427,7 @@ router.get("/admin/search", isLoggedInAdmin, async (req, res) => {
     const limit = 10; // Số lượng mục trên mỗi trang
     const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu từ CSDL
     let { searchby, keyword } = req.query;
+    console.log(searchby, keyword);
     const userReservation = await getReservationData(searchby, keyword, limit, offset);
     //console.log(userReservation);
     const totalCount = await getTotalCount(searchby, keyword);
