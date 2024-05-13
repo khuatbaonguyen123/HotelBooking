@@ -3,7 +3,12 @@ const router = express.Router();
 
 const Rating = require('../model_mongodb/dbmongo.js');
 const db = require('../database');
+<<<<<<< Updated upstream
 
+=======
+const mongoose = require('mongoose');
+const { ReturnDocument } = require('mongodb');
+>>>>>>> Stashed changes
 router.post('/rate', async (req, res) => {
     const roomType = req.body.typeRoom;
     const ratings = req.body.rating;
@@ -66,28 +71,6 @@ router.post('/rate', async (req, res) => {
     });
 });
 
-router.get('/comment', async (req, res) => {
-    try {
-        const {id} = req.query;
-        const comments = await Rating.find({ typeRoom: Number(id) });
-        let commentsHTML = ""
-        comments.forEach((comment, index) => {
-                commentsHTML += ` 
-                <div style = "margin-bottom: 1.5cm;border: 3px solid #ccc; padding: 10px; border-radius: 8px;">
-                <p class="timestamp">${comment.timestamp}</p>
-                <p>idUser: ${comment.idUser}</p> 
-                <p>Rate: ${comment.rating}</p> 
-                <p>Comment: ${comment.comment}</p>      
-                </div>
-            `;      
-        });
-        res.send(commentsHTML);
-    } catch (error) {
-        console.error('Lỗi lấy dữ liệu từ MongoDB:', error);
-        res.status(500).send('Lỗi lấy dữ liệu từ MongoDB');
-    }
-});
-
 router.get('/data', async (req, res) => {
     const {id} = req.query;
     try {
@@ -104,4 +87,65 @@ router.get('/data', async (req, res) => {
     }
 });
 
+<<<<<<< Updated upstream
+=======
+// pagination
+
+router.get('/commentbox/:id/:page', (req, res, next) => {
+    const id = req.params.id;
+    let comment = 3;
+    const page = req.params.page || 1;
+    console.log(page)
+    const count = Rating.countDocuments({ typeRoom: Number(id) });
+    Rating.find({ typeRoom: Number(id)}).skip((comment * page) - comment).limit(comment).exec((err, ratings) => {
+        Rating.countDocuments((err, count => {
+            if (err) return next(err);
+            res.send(ratings);
+        }))
+        
+    })
+})
+
+router.get('/count/:id', async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        let comment = 3;
+        const cnt = await Rating.countDocuments({ typeRoom: Number(id) });
+        const count = Math.ceil(cnt/comment);
+        res.send(count.toString()); // Chuyển đổi count thành chuỗi trước khi gửi đi
+    } catch (error) {
+        console.error('Lỗi:', error);
+        return res.status(500).json({ error: 'Lỗi' });
+    }
+});
+
+
+
+// const createRatings = async () => {
+//     const typeRoomValues = [1, 2, 3, 4, 5, 6];
+//     const ratingValues = [1, 2, 3, 4, 5];
+
+//     for (let i = 0; i < 5000000; i++) {
+//         const randomTypeRoomIndex = Math.floor(Math.random() * typeRoomValues.length);
+//         const randomRatingIndex = Math.floor(Math.random() * ratingValues.length);
+
+//         const newRating = new Rating({
+//             idUser: i, // Giả sử idUser tăng dần từ 0
+//             typeRoom: typeRoomValues[randomTypeRoomIndex],
+//             reservation: Math.floor(Math.random() * 1000), // Giả sử reservation là một số ngẫu nhiên từ 0 đến 999
+//             rating: ratingValues[randomRatingIndex],
+//             comment: faker.lorem.sentence(), // Tạo một câu ngẫu nhiên
+//             timestamp: faker.date.recent() // Tạo một thời gian ngẫu nhiên
+//         });
+
+//         await newRating.save();
+//     }
+
+//     console.log("Created 1 million ratings.");
+//     mongoose.disconnect();
+// }
+
+// createRatings();
+
+>>>>>>> Stashed changes
 module.exports = router;

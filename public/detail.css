@@ -16,13 +16,14 @@
     display: flex;
     transition: 0.5s;
 }
-.btn {
+.btnr{
     font-size: 45px;
     color: #999;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
+	display: flex;
 }
 
 .btn:hover {
@@ -400,6 +401,7 @@
 
   }
 
+<<<<<<< Updated upstream
   .btn-group .btn.submit {
 	background: var(--blue);
 	color: var(--white);
@@ -418,3 +420,99 @@
 .com {
     margin-bottom: 1.5cm; 
 }
+=======
+/* .pagination{
+	font-size: 2.5rem;
+	display: flex;
+	align-items: center;
+	justify-content:center;
+	list-style: none;
+	background-color: transparent;
+}
+
+.pagination-item{
+	
+}
+
+.pagination-item--active .pagination-item__link{
+	background-color: rgb(161, 92, 92);
+	color: var(--white);
+}
+
+.pagination-item__link{
+	display: block;
+	text-align: center;
+	font-size: 2.5rem;
+	text-decoration: none;
+	color:#939393;
+	margin-right: 1cm;
+	margin-left: 1cm;
+	min-width: 40px;
+	height: 30px;
+	line-height: 30px;
+	border-radius: 2px;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+}
+
+.pagination-item__icon{
+	color:#F5F5F5
+} */
+
+.pagination ul{
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	padding: 8px;
+	border-radius: 50px;
+	box-shadow: 0px 10px 15px rgba(0,0,0,0.1);
+  }
+  .pagination ul li{
+	color: white;
+	list-style: none;
+	line-height: 45px;
+	text-align: center;
+	font-size: 18px;
+	font-weight: 500;
+	cursor: pointer;
+	user-select: none;
+	transition: all 0.3s ease;
+  }
+  .pagination ul li.numb{
+	list-style: none;
+	min-width: 40px;
+	height: 30px;
+	margin: 0 3px;
+	line-height: 30px;
+	border-radius: 2px;
+	margin-right: 1cm;
+	margin-left: 1cm;
+  }
+  .pagination ul li.numb.first{
+	/* margin: 0px 3px 0 -5px; */
+	margin-right: 1cm;
+  }
+  .pagination ul li.numb.last{
+	/* margin: 0px -5px 0 3px; */
+	margin-left: 1cm;
+  }
+  .pagination ul li.dots{
+	font-size: 2.5rem;
+	cursor: default;
+  }
+  /* .pagination ul li.btn{
+	padding: 0 20px;
+	border-radius: 50px;
+  } */
+  .pagination li.active,
+  .pagination ul li.numb:hover,
+  .pagination ul li:first-child:hover,
+  .pagination ul li:last-child:hover{
+	/* color: #fff;
+	background: #20B2AA; */
+	background-color: rgb(161, 92, 92);
+	color: var(--white);
+  }
+  
+>>>>>>> Stashed changes

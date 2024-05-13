@@ -1,6 +1,7 @@
 const express = require('express');
 const ejs = require('ejs');
 require('dotenv').config();
+const router = express.Router();
 const session=require('express-session');
 const flash=require('connect-flash');
 const bodyParser = require('body-parser');
