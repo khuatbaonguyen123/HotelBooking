@@ -1,15 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { faker } = require('@faker-js/faker');
+
 const Rating = require('../model_mongodb/dbmongo.js');
 const db = require('../database');
 const mongoose = require('mongoose');
-
+const { ReturnDocument } = require('mongodb');
 router.post('/rate', async (req, res) => {
     const roomType = req.body.typeRoom;
     const ratings = req.body.rating;
     const id_reservation = req.body.numberRoom;
     const comment = req.body.comment;
+
+    console.log(req.session.userId);
+    console.log(id_reservation);
+    console.log(roomType);
+    console.log(ratings);
 
     const sql_query = `SELECT DISTINCT k.id, rr.reservation_id , type_id 
                         FROM booker k 
@@ -41,8 +46,6 @@ router.post('/rate', async (req, res) => {
                 if (existingRating) {
                     existingRating.comment = comment;
                     existingRating.rating = ratings;
-                    existingRating.timestamp = new Date();
-                    existingRating.comment += " (update)";
                     await existingRating.save();
                 }
                 else {
@@ -64,28 +67,6 @@ router.post('/rate', async (req, res) => {
     });
 });
 
-router.get('/comment', async (req, res) => {
-    try {
-        const {id} = req.query;
-        const comments = await Rating.find({ typeRoom: Number(id) });
-        let commentsHTML = ""
-        comments.forEach((comment, index) => {
-                commentsHTML += ` 
-                <div style = "margin-bottom: 1.5cm;border: 3px solid #ccc; padding: 10px; border-radius: 8px;">
-                <p class="timestamp">${comment.timestamp}</p>
-                <p>idUser: ${comment.idUser}</p> 
-                <p>Rate: ${comment.rating}</p> 
-                <p>Comment: ${comment.comment}</p>      
-                </div>
-            `;      
-        });
-        res.send(commentsHTML);
-    } catch (error) {
-        console.error('Lỗi lấy dữ liệu từ MongoDB:', error);
-        res.status(500).send('Lỗi lấy dữ liệu từ MongoDB');
-    }
-});
-
 router.get('/data', async (req, res) => {
     const {id} = req.query;
     try {
@@ -94,12 +75,45 @@ router.get('/data', async (req, res) => {
             { $group: { _id: '$rating', count: { $sum: 1 } } },
             { $project: { _id: 0, stars: '$_id', count: 1 } }
         ]);
+        console.log(data);
         res.json(data);
     } catch (error) {
         console.error('Error retrieving data:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+// pagination
+
+router.get('/commentbox/:id/:page', (req, res, next) => {
+    const id = req.params.id;
+    let comment = 3;
+    const page = req.params.page || 1;
+    console.log(page)
+    const count = Rating.countDocuments({ typeRoom: Number(id) });
+    Rating.find({ typeRoom: Number(id)}).skip((comment * page) - comment).limit(comment).exec((err, ratings) => {
+        Rating.countDocuments((err, count => {
+            if (err) return next(err);
+            res.send(ratings);
+        }))
+        
+    })
+})
+
+router.get('/count/:id', async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        let comment = 3;
+        const cnt = await Rating.countDocuments({ typeRoom: Number(id) });
+        const count = Math.ceil(cnt/comment);
+        res.send(count.toString()); // Chuyển đổi count thành chuỗi trước khi gửi đi
+    } catch (error) {
+        console.error('Lỗi:', error);
+        return res.status(500).json({ error: 'Lỗi' });
+    }
+});
+
+
 
 // const createRatings = async () => {
 //     const typeRoomValues = [1, 2, 3, 4, 5, 6];
