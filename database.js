@@ -4,7 +4,7 @@ const db = mysql.createPool({
   host: "localhost",
   user: "root",
   // port: 5001,
-  password: "", /// thay doi password
+  password: "123", /// thay doi password
   database: "bookingapp", // ghi ten database cua minh vao
 });
 

@@ -1,4 +1,6 @@
 const express = require('express');
+require("dotenv")
+const jwt = require("jsonwebtoken")
 const router = express.Router();
 const db=require('../database');
 const bcrypt=require('bcrypt');
@@ -13,8 +15,19 @@ function isLoggedOut(req,res,next){
 
 function isLoggedIn(req,res,next)
 {
-    if (req.session.userId)
-        next();
+    const token = req.session.accessToken
+    if (req.session.userId) {
+        if(token) {
+            jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, data) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log(`data: ${data} ; accesstoken ${token}`)
+                    next();
+                }
+            })
+        } 
+    }
     else res.redirect('/loginform');
 }
 
@@ -148,7 +161,10 @@ router.post('/signin', async (req, res) => {
                 bcrypt.compare(password, user.password, (err, isMatch) => {
                     if (err) throw err;
                     if (isMatch) {
+                        const accessToken = jwt.sign(user.id, process.env.JWT_ACCESS_TOKEN)
+                        req.session.accessToken = accessToken
                         req.session.userId = user.id;
+                        
                         res.redirect('/index');
                     } 
                     else {
@@ -218,7 +234,7 @@ router.get('/editProfile', isLoggedIn, (req, res) => {
         if (Number(id)===req.session.userId)  //user can only edit their own profile 
         {
             db.query(`select * 
-                    from  booker
+                    from booker 
                     where booker.id=${id}`,(err,results)=>{
                         if (err) throw err;
                         const userData=results[0];
@@ -255,9 +271,10 @@ router.post('/editProfile',isLoggedIn, async(req,res)=>{
                     req.flash('error','Email already registered');
                     res.redirect(`/editProfile?id=${id}`);
                 }
-                else  db.query(`update booker
+                else  db.query(`update  booker
                                 set first_name='${fname}',last_name='${lname}',email='${email}',phone='${phone}',birth_date='${dob}'
-                                and booker.id=${id}`,(err)=>{
+                                where 
+                                 booker.id=${id}`,(err)=>{
                                     if (err) throw err;
                                     res.redirect('/profile');
                 })
