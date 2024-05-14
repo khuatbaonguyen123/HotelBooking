@@ -40,7 +40,7 @@ CREATE TABLE reservation (
   date_in date,
   date_out date,
   booker_id int,
-  status enum('accept','decline','checkin','checkout') default 'accpet', 
+  status enum('accept','decline','checkin','checkout') default 'accept', 
   CONSTRAINT FK_rever_bookerid FOREIGN KEY (booker_id) references booker(id)
 );
 
