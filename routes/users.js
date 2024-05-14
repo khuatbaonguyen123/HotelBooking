@@ -9,7 +9,7 @@ const cli = require('../connect_redis.js');
 
 function isLoggedOut(req,res,next){
     if (req.session.userId)
-        res.redirect('/booking');
+        res.redirect('/loginform');
     else next();
 }
 

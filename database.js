@@ -3,8 +3,8 @@ const db = mysql.createPool({
   connectionLimit: 10,
   host: "localhost",
   user: "root",
-  // port: 5001,
-  password: "123", /// thay doi password
+  port: 5001,
+  password: "root", /// thay doi password
   database: "bookingapp", // ghi ten database cua minh vao
 });
 
