@@ -29,11 +29,12 @@ function dateFormatting2(dateType) {
 
 router.post("/admin/login", (req, res) => {
   const { email, password } = req.body;
-  if (!email | !password)
+  if (!email || !password)
     res.status(404).json({ message: "Please enter all fields" });
   else {
     db.query(
-      `select * from admin where email='${email}'`,
+      `SELECT * FROM admin WHERE email = ?`,
+      [email],
       (err, results) => {
         if (err) throw err;
         if (results.length > 0) {
@@ -54,6 +55,7 @@ router.post("/admin/login", (req, res) => {
     );
   }
 });
+
 
 function isLoggedInAdmin(req, res, next) {
   if (req.session.adminID) next();
@@ -111,7 +113,7 @@ router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
 router.post("/admin/accept/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
   db.query(
-    `update reservation set status = 'accept' where id = '${id}';`,
+    `update reservation set status = 'accept' where id = ?`,[id],
     (err, result) => {
       if (err) throw err;
       else {
@@ -123,7 +125,7 @@ router.post("/admin/accept/:id", isLoggedInAdmin, (req, res) => {
 router.post("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
   db.query(
-    `update reservation set status = 'decline' where id = '${id}';`,
+    `update reservation set status = 'decline' where id = ?`,[id],
     (err, result) => {
       if (err) throw err;
       else {
@@ -144,21 +146,21 @@ router.get("/admin/reservation", isLoggedInAdmin, (req, res) => {
 });
 //chat
 router.get("/admin/chat", isLoggedInAdmin, (req, res) => {
-  const adminQuery = `SELECT id, email FROM admin WHERE id = ${req.session.adminID};`;
-  db.query(adminQuery, (err, adminResult) => {
+  const adminQuery = `SELECT id, email FROM admin WHERE id = ?`;
+  db.query(adminQuery, [req.session.adminID], (err, adminResult) => {
     if (err) {
       console.error("Error fetching admin details:", err);
-      throw err;
+      res.status(500).send("Internal server error");
     } else {
       const adminData = {
-        user_id: adminResult[0].id, // Add user_id here
+        user_id: adminResult[0].id,
         email: adminResult[0].email,
       };
-      const userIdsQuery = "SELECT id,last_name FROM booker";
+      const userIdsQuery = "SELECT id, last_name FROM booker";
       db.query(userIdsQuery, (err, userResults) => {
         if (err) {
           console.error("Error fetching user IDs:", err);
-          throw err;
+          res.status(500).send("Internal server error");
         } else {
           const users = userResults.map(user => ({
             id: user.id,
@@ -259,12 +261,12 @@ router.post("/admin/search", isLoggedInAdmin, async (req, res) => {
 
 router.post("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
-  db.query(`select * from reservation where id = '${id}'`, (err, result) => {
+  db.query(`select * from reservation where id = ?`, [id], (err, result) => {
     if (err) throw err;
     else {
       if (result[0].status === "accept") {
         db.query(
-          `update reservation set status = 'checkin' where id = '${id}';`,
+          `update reservation set status = 'checkin' where id = ?`, [id],
           (err, result) => {
             if (err) throw err;
             else {
@@ -282,12 +284,12 @@ router.post("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
 router.post("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
   const { id } = req.params;
 
-  db.query(`select * from reservation where id = '${id}'`, (err, result) => {
+  db.query(`select * from reservation where id = ?`, [id], (err, result) => {
     if (err) throw err;
     else {
       if (result[0].status === "checkin") {
         db.query(
-          `update reservation set status = 'checkout' where id = '${id}';`,
+          `update reservation set status = 'checkout' where id = ?`, [id],
           (err, result) => {
             if (err) throw err;
             else {
@@ -312,12 +314,12 @@ router.post("/admin/checkout/:id", isLoggedInAdmin, async (req, res) => {
 
 router.post("/admin/decline/:id", isLoggedInAdmin, (req, res) => {
   const { id } = req.params;
-  db.query(`select * from reservation where id = '${id}'`, (err, result) => {
+  db.query(`select * from reservation where id = ?`, [id], (err, result) => {
     if (err) throw err;
     else {
       if (result[0].status === "accept") {
         db.query(
-          `update reservation set status = 'decline' where id = '${id}';`,
+          `update reservation set status = 'decline' where id = ?`, [id],
           (err, result) => {
             if (err) throw err;
             else {
@@ -385,7 +387,7 @@ router.post("/admin/roomlist", isLoggedInAdmin, (req, res) => {
     `select id, number, status, 
       if(status = 'available', null, booker) as booker
       from vroomlist
-      where type_id =${id}`,
+      where type_id =?`, [id],
     (err, data) => {
       if (err) {
         throw err;
@@ -411,40 +413,45 @@ async function addRoom(number, rtype) {
   }
 }
 
-router.post("/admin/addRoom", async(req, res)=>{
-  console.log(req.body);
-  const {number, type} = req.body;
-  let query = "select id from type where name = '" + type.toLowerCase() + "';";
-  console.log(query);
-  let rtype = 1;
-  db.query(query, (err, data) => {
+router.post("/admin/addRoom", isLoggedInAdmin, async (req, res) => {
+  const { number, type } = req.body;
+  const query = "SELECT id FROM type WHERE name = ?";
+  db.query(query, [type.toLowerCase()], async (err, data) => {
     if (err) {
-      throw err;
-    }
-    console.log(data);
-     rtype = data[0].id;
-    console.log(rtype);
-    db.query(`SELECT * FROM room WHERE number = ${number};`, async (error, data1) => {
-      if (error) {
-        throw error;
-      }
-      console.log(data1);
-      if(data1.length > 0) {
-        console.log(data1);
-        req.flash('error', `Room ${number} already exists`);
-        res.redirect("/admin/rooms");
-      } else {
-        try {
-          addRoom(number, rtype);
-          console.log('adddddddd');
-          req.flash('error', `Successfully added ${type} room ${number}` );
+      console.error(err);
+      res.status(500).send("Internal server error");
+    } else {
+      try {
+        const rtype = data[0].id;
+        const roomExistQuery = "SELECT * FROM room WHERE number = ?";
+        const roomExist = await new Promise((resolve, reject) => {
+          db.query(roomExistQuery, [number], (err, result) => {
+            if (err) reject(new Error(err.message));
+            resolve(result.length > 0);
+          });
+        });
+        if (roomExist) {
+          req.flash("error", `Room ${number} already exists`);
           res.redirect("/admin/rooms");
-        } catch (err) {
-          console.log(err);
-          res.status(500).send('Internal server error');
+        } else {
+          await new Promise((resolve, reject) => {
+            db.query(
+              "INSERT INTO room (number, type_id) VALUES (?, ?)",
+              [number, rtype],
+              (err, results) => {
+                if (err) reject(new Error(err.message));
+                resolve();
+              }
+            );
+          });
+          req.flash("error", `Successfully added ${type} room ${number}`);
+          res.redirect("/admin/rooms");
         }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal server error");
       }
-    });
+    }
   });
 });
 

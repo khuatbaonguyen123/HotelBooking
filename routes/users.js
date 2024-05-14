@@ -142,7 +142,7 @@ router.post('/signin', async (req, res) => {
     let checkPassword = await getCheckLink(password);
     console.log(checkPassword);
     if ((checkPassword === "Not Link" || checkPassword === "Safe")) {
-        db.query(`SELECT * FROM booker WHERE email='${email}'`, (err, results) => {
+        db.query('SELECT * FROM booker WHERE email=?', [email], (err, results) => {
             if (err) throw err;
             if (results.length > 0) {
                 const user = results[0];
@@ -151,62 +151,57 @@ router.post('/signin', async (req, res) => {
                     if (isMatch) {
                         req.session.userId = user.id;
                         res.redirect('/index');
-                    } 
-                    else {
+                    } else {
                         req.flash('error', 'Password is not correct');
                         res.redirect('/loginform');
                     }
                 });
-            } 
-            else {
+            } else {
                 req.flash('error', 'Email is not registered');
                 res.redirect('/loginform');
             }
         });
-    }
-    else {
+    } else {
         return res.status(400).json({ error: 'Password not valid.' });
     }
 });
 
+
 router.get('/profile', isLoggedIn, (req, res) => {
-    db.query(`select * 
-              from  booker 
-              where booker.id=${req.session.userId}`, (err,results)=>{
-                if (err) throw err;
-                const userData=results[0];
-                db.query(`select b.reservation_id,date_in,date_out,number,a.status, type_id
-                from reservation a 
-                join room_reserved b on a.id=b.reservation_id 
-                join room c on b.room_id=c.id join payment d on a.id=d.reservation_id
-                where booker_id=${req.session.userId}
-                order by reservation_id`,(err,results)=>{
-                            if (err) throw err;
-                            const userReservation = [];
-                            let i=0; //number of reservations
-                            results.forEach((element,index,arr) => {
-                                if (index===0 || element.type_id != arr[index-1].type_id)
-                                {
-                                    userReservation.push({
-                                        cnt: i + 1,
-                                        reservation_id: element.reservation_id,
-                                        typeRoom: element.type_id,
-                                        date_in: element.date_in,
-                                        date_out: element.date_out,
-                                        roomList: [element.number],
-                                        status: element.status
-                                    });
-                                    i++;
-                                }
-                                else
-                                {
-                                    userReservation[i-1].roomList.push(element.number);
-                                }
-                            });
-                            res.render('profile.ejs',{userData, userReservation});
-                        })
-              })
-})
+    db.query('SELECT * FROM booker WHERE id=?', [req.session.userId], (err, results) => {
+        if (err) throw err;
+        const userData = results[0];
+        db.query(`SELECT b.reservation_id, date_in, date_out, number, a.status, type_id
+                  FROM reservation a 
+                  JOIN room_reserved b ON a.id = b.reservation_id 
+                  JOIN room c ON b.room_id = c.id 
+                  JOIN payment d ON a.id = d.reservation_id
+                  WHERE booker_id = ?
+                  ORDER BY reservation_id`, [req.session.userId], (err, results) => {
+            if (err) throw err;
+            const userReservation = [];
+            let i = 0;
+            results.forEach((element, index, arr) => {
+                if (index === 0 || element.type_id != arr[index - 1].type_id) {
+                    userReservation.push({
+                        cnt: i + 1,
+                        reservation_id: element.reservation_id,
+                        typeRoom: element.type_id,
+                        date_in: element.date_in,
+                        date_out: element.date_out,
+                        roomList: [element.number],
+                        status: element.status
+                    });
+                    i++;
+                } else {
+                    userReservation[i - 1].roomList.push(element.number);
+                }
+            });
+            res.render('profile.ejs', { userData, userReservation });
+        });
+    });
+});
+
 
 router.get('/loginform', isLoggedOut, (req, res) => {
     res.render('loginform.ejs',{message:req.flash('error')});
@@ -220,7 +215,7 @@ router.get('/editProfile', isLoggedIn, (req, res) => {
         {
             db.query(`select * 
                     from  booker
-                    where booker.id=${id}`,(err,results)=>{
+                    where booker.id=?`, [id], (err,results)=>{
                         if (err) throw err;
                         const userData=results[0];
                         if (userData){    //user exists in database
@@ -238,9 +233,8 @@ router.get('/editProfile', isLoggedIn, (req, res) => {
     
 })
 
-router.post('/editProfile',isLoggedIn, async(req,res)=>{
-    //check not duplicated email
-    const {id,fname,lname,email,phone,dob}=req.body;
+router.post('/editProfile', isLoggedIn, async (req, res) => {
+    const { id, fname, lname, email, phone, dob } = req.body;
     
     let checkfName = await getCheckLink(fname);
     console.log("fname:" + checkfName);
@@ -248,25 +242,24 @@ router.post('/editProfile',isLoggedIn, async(req,res)=>{
         let checklName = await getCheckLink(lname);
         console.log("lname:" + checklName);
         if (checklName === "Not Link" || checklName === "Safe") {
-            db.query(`select * from booker where email='${email}' and id<>${id}`,(err,results)=>{
+            db.query('SELECT * FROM booker WHERE email=? AND id<>?', [email, id], (err, results) => {
                 if (err) throw err;
-                if (results.length>0) //duplicated email
-                {
-                    // res.json({error:'Email already registered'})
-                    req.flash('error','Email already registered');
+                if (results.length > 0) {
+                    req.flash('error', 'Email already registered');
                     res.redirect(`/editProfile?id=${id}`);
+                } else {
+                    db.query(`UPDATE booker
+                              SET first_name=?, last_name=?, email=?, phone=?, birth_date=?
+                              WHERE id=?`, [fname, lname, email, phone, dob, id], (err) => {
+                        if (err) throw err;
+                        res.redirect('/profile');
+                    });
                 }
-                else  db.query(`update booker
-                                set first_name='${fname}',last_name='${lname}',email='${email}',phone='${phone}',birth_date='${dob}'
-                                and booker.id=${id}`,(err)=>{
-                                    if (err) throw err;
-                                    res.redirect('/profile');
-                })
-            })
+            });
         }
     }
-   
-})
+});
+
 
 router.get('/editPassword', isLoggedIn, (req, res) => {
     const id=req.query.id;
@@ -283,42 +276,39 @@ router.get('/editPassword', isLoggedIn, (req, res) => {
     
 })
 
-router.post('/editPassword',isLoggedIn, async (req,res)=>{
-    const {id,oldPassword,newPassword,newPassword2}=req.body;
-    let CheckOldPassword = getCheckLink(oldPassword);
-    if (CheckOldPassword === "Not Link" || CheckOldPassword === "Safe") {
-        let CheckNewPassword = getCheckLink(newPassword);
-        if (CheckNewPassword === "Not Link" || CheckNewPassword === "Safe") {
-                db.query(`select password from booker where id=${id}`,(err,results)=>{
-                    if (err) throw err;
-                    if (results.length>0)  //account exists
-                    {
-                        const {password}=results[0];
-                        bcrypt.compare(oldPassword,password,async (err,isMatch)=>{
-                            if (err) throw err;
-                            if (isMatch)  //password valid
-                            {
-                                if (newPassword===newPassword2)  //new password confirmed
-                                {
-                                    let hashedPassword= await bcrypt.hash(newPassword,10);
-                                    db.query(`update booker set password='${hashedPassword}' where id=${id}`,(err)=>{
-                                        if (err) throw err;
-                                        res.redirect('/profile');
-                                    })
-                                }
+router.post('/editPassword', isLoggedIn, async (req, res) => {
+    const { id, oldPassword, newPassword, newPassword2 } = req.body;
+    let checkOldPassword = await getCheckLink(oldPassword);
+    if (checkOldPassword === "Not Link" || checkOldPassword === "Safe") {
+        let checkNewPassword = await getCheckLink(newPassword);
+        if (checkNewPassword === "Not Link" || checkNewPassword === "Safe") {
+            db.query('SELECT password FROM booker WHERE id=?', [id], (err, results) => {
+                if (err) throw err;
+                if (results.length > 0) {
+                    const { password } = results[0];
+                    bcrypt.compare(oldPassword, password, async (err, isMatch) => {
+                        if (err) throw err;
+                        if (isMatch) {
+                            if (newPassword === newPassword2) {
+                                let hashedPassword = await bcrypt.hash(newPassword, 10);
+                                db.query('UPDATE booker SET password=? WHERE id=?', [hashedPassword, id], (err) => {
+                                    if (err) throw err;
+                                    res.redirect('/profile');
+                                });
                             }
-                            else {
-                                req.flash('error','You enter the wrong password');
-                                res.redirect(`/editPassword?id=${id}`);
-                            }
-                        })
-                    }
-                    else res.redirect('/index');
-                })
+                        } else {
+                            req.flash('error', 'You entered the wrong password');
+                            res.redirect(`/editPassword?id=${id}`);
+                        }
+                    });
+                } else {
+                    res.redirect('/index');
+                }
+            });
         }
     }
+});
 
-})
 
 
 router.get('/logout', isLoggedIn, (req,res)=>{

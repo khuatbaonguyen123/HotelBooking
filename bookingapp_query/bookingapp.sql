@@ -1,5 +1,5 @@
-create database bookingapp;
-use bookingapp;
+create database bookingapp2;
+use bookingapp2;
 -- TABLES
 
 -- we do not concern about the info of admin so we don't need admin table 

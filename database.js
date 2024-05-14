@@ -4,8 +4,8 @@ const mysql = require("mysql");
 const db = mysql.createPool({
   connectionLimit: 10, // Adjust this value according to your needs
   host: "localhost",
-  user: "root",
-  password: "password", // Replace with your actual password
+  user: "admin1",
+  password: "password", // Replace with your actual password (Create a new user and grant least privilleges)
   database: "bookingapp1",
 });
 
