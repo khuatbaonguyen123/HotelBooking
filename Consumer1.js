@@ -64,7 +64,7 @@ const run = async () => {
             response1.forEach((element, index, arr) => {
               var booking = {
                 id: element.id,
-                // booker_id: element.booker_id,
+                booker_id: element.booker_id,
                 name: element.name,
                 phone: element.phone,
                 date_in: dateFormatting(element.date_in),
@@ -86,14 +86,15 @@ const run = async () => {
             });
 
             var newData = {
-              bid: userReservation[0].id,
+              id: userReservation[0].id,
+              booker_id: userReservation[0].booker_id,
               name: userReservation[0].name,
               date_in: userReservation[0].date_in,
               date_out: userReservation[0].date_out,
               description: userReservation[0].description,
               status: userReservation[0].status,
               price: userReservation[0].price,
-              payment_date: userReservation[0].payment_date,
+              payment_date: userReservation[0].payment_date
             };
             await clientES.index({
               index: "bookingapp",

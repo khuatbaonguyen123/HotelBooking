@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const Rating = require('./model_mongodb/dbmongo');
 const clientES = require('./SearchEngine'); // Import OpenSearch client
+const db = require("./database");
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -30,23 +31,25 @@ const run = async () => {
 
           // Logging the operation type
           const op = payload.op;
+          const userName = '${payload.after.first_name} ${payload.after.last_name}';
           console.log('Operation:', op);
-
           if (op === 'u' && payload.after) {
-            const newData = {
-              doc: {
-                name: `${payload.after.first_name} ${payload.after.last_name}`
+            db.query(`SELECT distinct (id) FROM bookingapp.vreservation where name= ${userName};`, async (err, result) => {
+              for(let i = 0; i < result.length; i++) {
+                const newData = {
+                  doc: {
+                    name: `${userName}`
+                  }
+                };
+                const response = await clientES.update({
+                  index: 'bookingapp',
+                  id: result[i].id, // Ensure the correct ID is used
+                  body: newData
+                });
               }
-            };
-            const response = await clientES.update({
-              index: 'bookingapp',
-              id: payload.after.id, // Ensure the correct ID is used
-              body: newData
             });
-            console.log(`Updated document with name ${payload.after.first_name} ${payload.after.last_name}`);
-          }
-
-          if (op === 'd' && payload.before) {
+            console.log(`Updated document with name: ${userName}`);
+          } else if (op === 'd' && payload.before) {
             const idToDelete = payload.before.id;
             const response = await clientES.delete({
               index: 'bookingapp',
