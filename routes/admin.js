@@ -263,7 +263,7 @@ function getReservationData (searchby, keyword, limit, offset) {
         query: {
           bool: {
             must: [
-              {match: { bid: keyword }}
+              {match: { id: keyword }}
             ]
           }
         },
@@ -358,7 +358,7 @@ function getTotalCount(searchby, keyword) {
         query: {
           bool: {
             must: [
-              {match: { bid: keyword }}
+              {match: { id: keyword }}
             ]
           }
         },

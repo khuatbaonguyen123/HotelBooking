@@ -124,15 +124,15 @@ services:
   #   networks:
   #     - hotelbooking
 
-  # watcher:
-  #   image: debezium/kafka
-  #   container_name: watcher
-  #   command: watch-topic -a -k dbserver1.bookingapp.booker
-  #   depends_on:
-  #     - zookeeper
-  #     - kafka
-  #   networks:
-  #     - hotelbooking
+  watcher:
+    image: debezium/kafka
+    container_name: watcher
+    command: watch-topic -a -k dbserver1.bookingapp.booker
+    depends_on:
+      - zookeeper
+      - kafka
+    networks:
+      - hotelbooking
 
 volumes:
   mongo-0-a:

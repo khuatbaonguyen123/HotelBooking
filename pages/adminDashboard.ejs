@@ -147,7 +147,12 @@
 		table_headings.forEach((head, i) => {
 		let sort_asc = true;
 		head.onclick = () => {
-			sortTable(i, sort_asc);
+			if(i == 0) {
+			    sortTableNumber(i, sort_asc);
+                console.log(i);
+            } else {
+			    sortTableText(i, sort_asc);
+            }
 			table_headings.forEach(head => head.classList.remove('active'));
 			head.classList.add('active');
 
@@ -160,7 +165,16 @@
 			sort_asc = head.classList.contains('asc') ? false : true;
 		}
 	})
-	function sortTable(column, sort_asc) {
+	function sortTableNumber(column, sort_asc) {
+		[...table_rows].sort((a, b) => {
+			let first_row = parseInt(a.querySelectorAll('td')[column].textContent, 10),
+				second_row = parseInt(b.querySelectorAll('td')[column].textContent, 10);
+
+			return sort_asc ? (first_row < second_row ? 1 : -1) : (first_row < second_row ? -1 : 1);
+		})
+			.map(sorted_row => document.querySelector('tbody').appendChild(sorted_row));
+	}
+	function sortTableText(column, sort_asc) {
 		[...table_rows].sort((a, b) => {
 			let first_row = a.querySelectorAll('td')[column].textContent.toLowerCase(),
 				second_row = b.querySelectorAll('td')[column].textContent.toLowerCase();
