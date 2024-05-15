@@ -1,14 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
+const jwt = require("jsonwebtoken");
 
-function isLoggedIn(req, res, next) {
+function isLoggedIn(req,res,next)
+{
+    const token = req.session.accessToken
     if (req.session.userId) {
-        console.log(`User ID: ${req.session.userId}, Email: ${req.session.email}`);
-        next();
-    } else {
-        res.redirect('/loginform');
+        if(token) {
+            jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, data) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log(`data: ${data} ; accesstoken ${token}`)
+                    next();
+                }
+            })
+        } 
     }
+    else res.redirect('/loginform');
 }
 
 router.get("/chat", isLoggedIn, (req, res) => {

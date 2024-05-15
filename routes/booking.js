@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const slaveConnection = require('../database');
 const {set, incr, expire, ttl} = require('./limiter.js');
+const jwt = require("jsonwebtoken");
 
 /**
  * It returns an array of room numbers of a given room type.
@@ -18,8 +19,19 @@ function isLoggedOut(req,res,next){
 
 function isLoggedIn(req,res,next)
 {
-    if (req.session.userId)
-        next();
+    const token = req.session.accessToken
+    if (req.session.userId) {
+        if(token) {
+            jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, data) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log(`data: ${data} ; accesstoken ${token}`)
+                    next();
+                }
+            })
+        } 
+    }
     else res.redirect('/loginform');
 }
 
