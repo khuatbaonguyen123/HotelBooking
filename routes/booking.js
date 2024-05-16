@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../database');
-const slaveConnection = require('../database');
-const {set, incr, expire, ttl} = require('./limiter.js');
+const db = require("../database");
+const slaveConnection = require("../database");
+const { set, incr, expire, ttl } = require("./limiter.js");
 const jwt = require("jsonwebtoken");
-const { connect } = require('mongoose');
+const { connect } = require("mongoose");
 
 /**
  * It returns an array of room numbers of a given room type.
@@ -12,59 +12,58 @@ const { connect } = require('mongoose');
  * @returns An array of room numbers which type is the same with roomType.
  */
 
-function isLoggedOut(req,res,next){
-    if (req.session.userId)
-        res.redirect('/booking');
-    else next();
+function isLoggedOut(req, res, next) {
+  if (req.session.userId) res.redirect("/booking");
+  else next();
 }
 
-function isLoggedIn(req,res,next)
-{
-    const token = req.session.accessToken
-    if (req.session.userId) {
-        if(token) {
-            jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, data) => {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log(`data: ${data} ; accesstoken ${token}`)
-                    next();
-                }
-            })
-        } 
+function isLoggedIn(req, res, next) {
+  const token = req.session.accessToken;
+  if (req.session.userId) {
+    if (token) {
+      jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (err, data) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(`data: ${data} ; accesstoken ${token}`);
+          next();
+        }
+      });
     }
-    else res.redirect('/loginform');
+  } else res.redirect("/loginform");
 }
 
-async function limitRequest (req, res, next){
-    const getIPUser = req.header['x-forwarded-for'] || req.connection.remoteAddress;
-    let _ttl = await ttl(getIPUser);
-    if(_ttl <= 0) {
-        await set(getIPUser);
-        await expire(getIPUser, 5);
-        _ttl = 5;
-    }
-    let numberRequest = await incr(getIPUser);
-    if(numberRequest > 3) {
-        res.render("503_error.ejs");
-    } else {
-        next();
-    }
+async function limitRequest(req, res, next) {
+  const getIPUser =
+    req.header["x-forwarded-for"] || req.connection.remoteAddress;
+  let _ttl = await ttl(getIPUser);
+  if (_ttl <= 0) {
+    await set(getIPUser);
+    await expire(getIPUser, 5);
+    _ttl = 5;
+  }
+  let numberRequest = await incr(getIPUser);
+  if (numberRequest > 3) {
+    res.render("503_error.ejs");
+  } else {
+    next();
+  }
 }
 
-router.get('/booking', isLoggedIn, async (req, res) => {
-    res.render('booking.ejs',{messages: req.flash('errors')});
-}) //must log in to see
+router.get("/booking", isLoggedIn, async (req, res) => {
+  res.render("booking.ejs", { messages: req.flash("errors") });
+}); //must log in to see
 
-router.get('/roomSelect', isLoggedIn, (req, res) => {
-    res.render('roomSelect.ejs');
-})
+router.get("/roomSelect", isLoggedIn, (req, res) => {
+  res.render("roomSelect.ejs");
+});
 
 async function getRoomsOfType(roomType, arrivalDate, departureDate) {
-    let response;
-    try {
-        response = await new Promise((resolve, reject) => {
-            slaveConnection.query(`SELECT number 
+  let response;
+  try {
+    response = await new Promise((resolve, reject) => {
+      slaveConnection.query(
+        `SELECT number 
                     FROM room 
                     WHERE type_id = ?
                     AND id NOT IN (
@@ -75,251 +74,347 @@ async function getRoomsOfType(roomType, arrivalDate, departureDate) {
                             FROM reservation
                             WHERE (status = 'accept' OR status = 'checkin') AND ((date_in <= ? AND ? < date_out) OR (date_in < ? AND ? <= date_out) OR (? < date_in AND date_out < ?))
                         )
-                    )`, [roomType, arrivalDate, arrivalDate, departureDate, departureDate, arrivalDate, departureDate], (err, results) => {
-                if (err) reject(new Error(err.message));
-                resolve(results);
-            });
-        });
-    } catch (error) {
-        console.log(error);
-    }
-    return response.map(row => row.number);
+                    )`,
+        [
+          roomType,
+          arrivalDate,
+          arrivalDate,
+          departureDate,
+          departureDate,
+          arrivalDate,
+          departureDate,
+        ],
+        (err, results) => {
+          if (err) reject(new Error(err.message));
+          resolve(results);
+        }
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return response.map((row) => row.number);
 }
 
 async function calculatePrice(type_id, arrivalDate, departureDate) {
-    type_id = Number(type_id);
-    const parsedArrivalDate = new Date(Date.parse(arrivalDate));
-    const parsedDepartureDate = new Date(Date.parse(departureDate));
+  type_id = Number(type_id);
+  const parsedArrivalDate = new Date(Date.parse(arrivalDate));
+  const parsedDepartureDate = new Date(Date.parse(departureDate));
 
-    try {
-        const results = await new Promise((resolve, reject) => {
-            db.query(`
+  try {
+    const results = await new Promise((resolve, reject) => {
+      db.query(
+        `
             SELECT month, year, price_each_day
             FROM month_price
             WHERE type_id = ? `,
-                [type_id],
-                (error, results) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(results);
-                    }
-                }
-            );
-        });
-
-        // Calculate the total price for the entire stay
-        let totalPrice = 0;
-        let currentDate = new Date(parsedArrivalDate.getTime());
-        while (currentDate < parsedDepartureDate) {
-            const currentMonth = currentDate.getMonth() + 1;
-            const currentYear = currentDate.getFullYear();
-            const matchingRow = results.find((row) => row.month === currentMonth && row.year === currentYear);
-            if (matchingRow) {
-                totalPrice += matchingRow.price_each_day;
-            }
-            currentDate.setDate(currentDate.getDate() + 1);
+        [type_id],
+        (error, results) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(results);
+          }
         }
-        return totalPrice;
-    } catch (error) {
-        console.log(error);
+      );
+    });
+
+    // Calculate the total price for the entire stay
+    let totalPrice = 0;
+    let currentDate = new Date(parsedArrivalDate.getTime());
+    while (currentDate < parsedDepartureDate) {
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+      const matchingRow = results.find(
+        (row) => row.month === currentMonth && row.year === currentYear
+      );
+      if (matchingRow) {
+        totalPrice += matchingRow.price_each_day;
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
     }
+    return totalPrice;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function nextReservationID() {
-    let response;
-    try {
-        response = await new Promise((resolve, reject) => {
-            db.query(`SELECT MAX(id) FROM reservation`, (err, results) => {
-                if (err) reject(new Error(err.message));
-                resolve(results[0]['MAX(id)']);
-            });
-        });
-    } catch (error) {
-        console.log(error);
-    }
-    return response;
+  let response;
+  try {
+    response = await new Promise((resolve, reject) => {
+      db.query(`SELECT MAX(id) FROM reservation`, (err, results) => {
+        if (err) reject(new Error(err.message));
+        resolve(results[0]["MAX(id)"]);
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return response;
 }
 
 async function addReservation(arrivalDate, departureDate, booker_id) {
-    try {
-        await new Promise((resolve, reject) => {
-            db.query(`insert into reservation(date_in,date_out,booker_id)
+  try {
+    await new Promise((resolve, reject) => {
+      db.query(
+        `insert into reservation(date_in,date_out,booker_id)
             values
-            (?,?,?)`, [arrivalDate, departureDate, booker_id], (err, results) => {
-                if (err) reject(new Error(err.message));
-                resolve();
-            });
-        });
-    } catch (error) {
-        console.log(error);
-    }
+            (?,?,?)`,
+        [arrivalDate, departureDate, booker_id],
+        (err, results) => {
+          if (err) reject(new Error(err.message));
+          resolve();
+        }
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function addPayment(reservationID, totalPrice) {
-    try {
-        await new Promise((resolve, reject) => {
-            db.query(`insert into payment(reservation_id,total_price)
+  try {
+    await new Promise((resolve, reject) => {
+      db.query(
+        `insert into payment(reservation_id,total_price)
             values
-            (?,?)`, [reservationID, totalPrice], (err, results) => {
-                if (err) reject(new Error(err.message));
-                resolve();
-            });
-        });
-    } catch (error) {
-        console.log(error);
-    }
+            (?,?)`,
+        [reservationID, totalPrice],
+        (err, results) => {
+          if (err) reject(new Error(err.message));
+          resolve();
+        }
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function findRoomID(roomNumber) {
-    let response;
-    try {
-        response = await new Promise((resolve, reject) => {
-            db.query(`select id
+  let response;
+  try {
+    response = await new Promise((resolve, reject) => {
+      db.query(
+        `select id
             from room
-            where number = ?`, [roomNumber], (err, results) => {
-                if (err) reject(new Error(err.message));
-                resolve(results[0]['id']);
-            });
-        });
-    } catch (error) {
-        console.log(error);
-    }
-    return response;
+            where number = ?`,
+        [roomNumber],
+        (err, results) => {
+          if (err) reject(new Error(err.message));
+          resolve(results[0]["id"]);
+        }
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return response;
 }
 
 async function addRoomReserved(reservationId, roomId) {
-    try {
-        await new Promise((resolve, reject) => {
-            db.query(`insert into room_reserved(reservation_id,room_id)
+  try {
+    await new Promise((resolve, reject) => {
+      db.query(
+        `insert into room_reserved(reservation_id,room_id)
             values
-            (?,?)`, [reservationId, roomId], (err, results) => {
-                if (err) reject(new Error(err.message));
-                resolve();
-            });
-        });
-    } catch (error) {
-        console.log(error);
-    }
+            (?,?)`,
+        [reservationId, roomId],
+        (err, results) => {
+          if (err) reject(new Error(err.message));
+          resolve();
+        }
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-router.post('/booking',isLoggedIn, limitRequest, async (req, res) => {
-    try {
-        const { 'arrival-date': arrivalDate, 'departure-date': departureDate } = req.body;
-        // console.log(arrivalDate, departureDate);
-        const roomTypeName = new Map([
-            ['1', 'Single'],
-            ['2', 'Double'],
-            ['3', 'Triple'],
-            ['4', 'Quad'],
-            ['5', 'President'],
-            ['6', 'Rooftop']
-        ]);
-        const roomCounts = req.body.room.reduce((counts, room) => {
-            counts[room] = (counts[room] || 0) + 1;
-            return counts;
-        }, {});
-        // console.log(roomCounts);
-        let errors = [];
-        const resData = await Promise.all(Object.keys(roomCounts).map(async roomType => {
-            const roomIds = await getRoomsOfType(roomType, arrivalDate, departureDate);
-            const numRoomsOfType = roomIds.length;
-            if (numRoomsOfType < roomCounts[roomType]) {
-                errors.push(`Not enough ${roomTypeName.get(roomType)} rooms available`);
-            }
-            let price = await calculatePrice(roomType, arrivalDate, departureDate);
-            return { arrivalDate, departureDate, userId: req.session.userId, type: roomType, nameofType: roomTypeName.get(roomType), roomOfType: roomIds, numRoomsOfType: numRoomsOfType, price: price, numRoomsChosen: roomCounts[roomType] };
-        }));
-        if (errors.length > 0) {
-            req.flash('errors', errors);
-            res.redirect('/booking');
+router.post("/booking", isLoggedIn, limitRequest, async (req, res) => {
+  try {
+    const { "arrival-date": arrivalDate, "departure-date": departureDate } =
+      req.body;
+    // console.log(arrivalDate, departureDate);
+    const roomTypeName = new Map([
+      ["1", "Single"],
+      ["2", "Double"],
+      ["3", "Triple"],
+      ["4", "Quad"],
+      ["5", "President"],
+      ["6", "Rooftop"],
+    ]);
+    const roomCounts = req.body.room.reduce((counts, room) => {
+      counts[room] = (counts[room] || 0) + 1;
+      return counts;
+    }, {});
+    // console.log(roomCounts);
+    let errors = [];
+    const resData = await Promise.all(
+      Object.keys(roomCounts).map(async (roomType) => {
+        const roomIds = await getRoomsOfType(
+          roomType,
+          arrivalDate,
+          departureDate
+        );
+        const numRoomsOfType = roomIds.length;
+        if (numRoomsOfType < roomCounts[roomType]) {
+          errors.push(
+            `Not enough ${roomTypeName.get(roomType)} rooms available`
+          );
         }
-        else {
-            // console.log(resData);
-            res.render('roomSelect.ejs', { resData });
-        }
+        let price = await calculatePrice(roomType, arrivalDate, departureDate);
+        return {
+          arrivalDate,
+          departureDate,
+          userId: req.session.userId,
+          type: roomType,
+          nameofType: roomTypeName.get(roomType),
+          roomOfType: roomIds,
+          numRoomsOfType: numRoomsOfType,
+          price: price,
+          numRoomsChosen: roomCounts[roomType],
+        };
+      })
+    );
+    if (errors.length > 0) {
+      req.flash("errors", errors);
+      res.redirect("/booking");
+    } else {
+      // console.log(resData);
+      res.render("roomSelect.ejs", { resData });
     }
-    catch (err) {
-        console.log(err);
-        res.status(500).send('Internal server error');
-    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal server error");
+  }
 });
+
+// async function isAvailable(req, res, next) {
+//   const arrivalDate = req.body.arrivalDate;
+//   const departureDate = req.body.departureDate;
+//   const roomNumbers = Object.values(req.body.rooms);
+//   console.log(arrivalDate, departureDate);
+//   for (let i = 0; i < roomNumbers.length; i++) {
+//     let query = `select * from vReservation
+//             where number = ${roomNumbers[i]} and 
+//             (status != 'checkout' and status != 'decline') and 
+//             (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
+//             ('${departureDate}' > date_in and '${departureDate}' <= date_out));`;
+//     console.log(query);
+//     db.query(query, (err, result) => {
+//       console.log(err);
+//       console.log(result);
+//       if (result && result.length > 0) {
+//         res.json("Room is no available");
+//       }
+//     });
+//   }
+//   next();
+// }
+
+//trang
 
 async function isAvailable (req, res, next){
     const arrivalDate = req.body.arrivalDate;
     const departureDate = req.body.departureDate;
-    const roomNumbers = Object.values(req.body.rooms);;
-    console.log(arrivalDate, departureDate);
+    const roomNumbers = Object.values(req.body.rooms);
+    let unavailableRooms = [];
+
     for (let i = 0; i < roomNumbers.length; i++) {
-        let query = `select * from vreservation
+        let query = `select * from vReservation
             where number = ${roomNumbers[i]} and 
             (status != 'checkout' and status != 'decline') and 
             (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
             ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
-            console.log(query);
-            db.query(query, (err, result) => {
-                console.log(err);
-                console.log(result);
-                if (result && result.length > 0) {
-                    res.json('Room is no available');
+            
+        let result = await new Promise((resolve, reject) => {
+            db.query(query, (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
                 }
             });
+        });
+
+        if (result && result.length > 0) {
+            unavailableRooms.push(roomNumbers[i]);
+        }
     }
-    next();
+
+    if (unavailableRooms.length > 0) {
+        req.flash('errors', [`Room(s) ${unavailableRooms.join(', ')} are not available`]);
+        res.redirect('/booking');
+    } else {
+        next();
+    }
 }
 
-router.post('/roomSelect',isLoggedIn, isAvailable, async (req, res) => {
-    try {
-        console.log(req.body);
-        // // Get the next reservation ID
-        const nextID = await nextReservationID() + 1;
-        console.log(nextID);
-        db.getConnection((err, connection) => {
-            if(err) {
-                throw err;
-            } else {
-                connection.beginTransaction(async (err) => {
-                    if (err) {
-                        connection.release();
-                        throw err;
-                    }
-                    try {
-                        // Add the reservation using the next ID
-                        await addReservation(req.body.arrivalDate, req.body.departureDate, req.body.userId);
-                        await addPayment(nextID,req.body.totalPrice);
-                        // Extract the room IDs from the request body and add them to an array
-                        const roomNumbers = Object.values(req.body.rooms);
-                        // Add a reservation for each room using the next ID
-                        for (let i = 0; i < roomNumbers.length; i++) {
-                            const roomId = await findRoomID(Number(roomNumbers[i]));
-                            await addRoomReserved(nextID, roomId);
-                        }
-                    } catch (err) {
-                        connection.rollback(() => {
-                            connection.release();
-                        });
-                    }
-                    connection.commit((err) => {
-                        if (err) {
-                            connection.rollback(() => {
-                                connection.release();
-                                throw err;
-                            });
-                        }
-                        connection.release();
-                        req.flash('success', 'Thanks for your booking. Wish you have a good time at our hotel');
-                        res.redirect('/index');
-                    });
-                });
-            }
-        });
-        // req.flash('success', 'Thanks for your booking. Wish you have a good time at our hotel');
-        // res.redirect('/index');
-    }
-    catch (err) {
-        console.log(err);
-        res.status(500).send('Internal server error');
-    }
-})
 
-module.exports = router
+
+//trang
+
+
+router.post("/roomSelect", isLoggedIn, isAvailable, async (req, res) => {
+  try {
+    console.log(req.body);
+    // // Get the next reservation ID
+    const nextID = (await nextReservationID()) + 1;
+    console.log(nextID);
+    db.getConnection((err, connection) => {
+      if (err) {
+        throw err;
+      } else {
+        connection.beginTransaction(async (err) => {
+          if (err) {
+            connection.release();
+            throw err;
+          }
+          try {
+            // Add the reservation using the next ID
+            await addReservation(
+              req.body.arrivalDate,
+              req.body.departureDate,
+              req.body.userId
+            );
+            await addPayment(nextID, req.body.totalPrice);
+            // Extract the room IDs from the request body and add them to an array
+            const roomNumbers = Object.values(req.body.rooms);
+            // Add a reservation for each room using the next ID
+            for (let i = 0; i < roomNumbers.length; i++) {
+              const roomId = await findRoomID(Number(roomNumbers[i]));
+              await addRoomReserved(nextID, roomId);
+            }
+          } catch (err) {
+            connection.rollback(() => {
+              connection.release();
+            });
+          }
+          connection.commit((err) => {
+            if (err) {
+              connection.rollback(() => {
+                connection.release();
+                throw err;
+              });
+            }
+            connection.release();
+            req.flash(
+              "success",
+              "Thanks for your booking. Wish you have a good time at our hotel"
+            );
+            res.redirect("/index");
+          });
+        });
+      }
+    });
+    // req.flash('success', 'Thanks for your booking. Wish you have a good time at our hotel');
+    // res.redirect('/index');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal server error");
+  }
+});
+
+module.exports = router;

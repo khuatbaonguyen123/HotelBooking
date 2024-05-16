@@ -103,6 +103,14 @@
                                     <h2 class="headline" style="color: #cbcbcb;">Hotel Booking</h2>
                                 </div>
 
+                                <% if (messages && messages.length > 0) { %>
+                                    <div class="alert alert-danger" style="color: red;">
+                                      <% messages.forEach(function(error) { %>
+                                        <p><%= error %></p>
+                                      <% }) %>
+                                    </div>
+                                  <% } %>
+
                                 <!-- Select date-->
                                 <div class="select-date">
                                     <div class="select-date-title">
@@ -197,13 +205,7 @@
                                     </div>
                                 </div>
                                 
-                                <% if (messages && messages.length > 0) { %>
-                                    <div class="alert alert-danger">
-                                      <% messages.forEach(function(error) { %>
-                                        <p><%= error %></p>
-                                      <% }) %>
-                                    </div>
-                                  <% } %>
+
                                 
                                 <li>
                                     <button type="submit" class="btn btn-white">Submit</button>
