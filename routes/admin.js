@@ -599,6 +599,45 @@ router.post("/admin/addRoom", async (req, res) => {
   });
 });
 
+//add again delete room
+router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
+  const { id } = req.params;
+  db.query(
+    `SELECT r.status FROM reservation r 
+     JOIN room_reserved rv ON rv.reservation_id = r.id 
+     WHERE rv.room_id = '${id}'`,
+    (error, result) => {
+      if (error) {
+        throw error;
+      } else if (result.length === 0) {
+        db.query(`DELETE FROM room WHERE id = '${id}'`, (err, room) => {
+          if (err) {
+            throw err;
+          } else {
+            console.log(room);
+            res.redirect("/admin/rooms");
+          }
+        });
+      } else {
+        let status = result[0].status;
+        if (status === "accept" || status === "checkin" || status === "pending") {
+          res.redirect("/admin/rooms");
+        } else {
+          db.query(`DELETE FROM room WHERE id = '${id}'`, (err, room) => {
+            if (err) {
+              throw err;
+            } else {
+              console.log(room);
+              res.redirect("/admin/rooms");
+            }
+          });
+        }
+      }
+    }
+  );
+});
+
+
 router.get("/admin/addRoomForm", (req, res) => {
   res.render("adminAddRoom.ejs");
 });
