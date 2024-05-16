@@ -258,7 +258,7 @@ router.post('/room_search', function(req, res) {
     const query = `select distinct t.id, name, description, link, image, price_each_day from type t
                   join month_price m on t.id = m.type_id
                   where m.month = extract(month from NOW()) and
-                  match(description) against('${search}');`;
+                  (match(description) against('${search}') or name = '${search}');`;
     db.query(query, (err, data) => {
         //console.log(data);
         if (err) throw err;

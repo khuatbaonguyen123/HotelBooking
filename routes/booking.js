@@ -4,6 +4,7 @@ const db = require('../database');
 const slaveConnection = require('../database');
 const {set, incr, expire, ttl} = require('./limiter.js');
 const jwt = require("jsonwebtoken");
+const { connect } = require('mongoose');
 
 /**
  * It returns an array of room numbers of a given room type.
@@ -244,27 +245,27 @@ router.post('/booking',isLoggedIn, limitRequest, async (req, res) => {
     }
 });
 
-function isAvailable (req, res, next){
+async function isAvailable (req, res, next){
     const arrivalDate = req.body.arrivalDate;
     const departureDate = req.body.departureDate;
-    const roomNumber = req.body.rooms;
+    const roomNumbers = Object.values(req.body.rooms);;
     console.log(arrivalDate, departureDate);
-    let query = `select * from vreservation
-            where number = ${roomNumber} and 
+    for (let i = 0; i < roomNumbers.length; i++) {
+        let query = `select * from vreservation
+            where number = ${roomNumbers[i]} and 
             (status != 'checkout' and status != 'decline') and 
             (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
             ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
-    console.log(query);
-    db.query(query, (err, result) => {
+            console.log(query);
+            db.query(query, (err, result) => {
                 console.log(err);
                 console.log(result);
                 if (result && result.length > 0) {
-                    res.json('Room is not available');
-                }
-                else{
-                    next();
+                    res.json('Room is no available');
                 }
             });
+    }
+    next();
 }
 
 router.post('/roomSelect',isLoggedIn, isAvailable, async (req, res) => {
@@ -273,18 +274,47 @@ router.post('/roomSelect',isLoggedIn, isAvailable, async (req, res) => {
         // // Get the next reservation ID
         const nextID = await nextReservationID() + 1;
         console.log(nextID);
-        // // Add the reservation using the next ID
-        await addReservation(req.body.arrivalDate, req.body.departureDate, req.body.userId);
-        await addPayment(nextID,req.body.totalPrice);
-        // Extract the room IDs from the request body and add them to an array
-        const roomNumbers = Object.values(req.body.rooms);
-        // Add a reservation for each room using the next ID
-        for (let i = 0; i < roomNumbers.length; i++) {
-            const roomId = await findRoomID(Number(roomNumbers[i]));
-            await addRoomReserved(nextID, roomId);
-        }
-        req.flash('success', 'Thanks for your booking. Wish you have a good time at our hotel');
-        res.redirect('/index');
+        db.getConnection((err, connection) => {
+            if(err) {
+                throw err;
+            } else {
+                connection.beginTransaction(async (err) => {
+                    if (err) {
+                        connection.release();
+                        throw err;
+                    }
+                    try {
+                        // Add the reservation using the next ID
+                        await addReservation(req.body.arrivalDate, req.body.departureDate, req.body.userId);
+                        await addPayment(nextID,req.body.totalPrice);
+                        // Extract the room IDs from the request body and add them to an array
+                        const roomNumbers = Object.values(req.body.rooms);
+                        // Add a reservation for each room using the next ID
+                        for (let i = 0; i < roomNumbers.length; i++) {
+                            const roomId = await findRoomID(Number(roomNumbers[i]));
+                            await addRoomReserved(nextID, roomId);
+                        }
+                    } catch (err) {
+                        connection.rollback(() => {
+                            connection.release();
+                        });
+                    }
+                    connection.commit((err) => {
+                        if (err) {
+                            connection.rollback(() => {
+                                connection.release();
+                                throw err;
+                            });
+                        }
+                        connection.release();
+                        req.flash('success', 'Thanks for your booking. Wish you have a good time at our hotel');
+                        res.redirect('/index');
+                    });
+                });
+            }
+        });
+        // req.flash('success', 'Thanks for your booking. Wish you have a good time at our hotel');
+        // res.redirect('/index');
     }
     catch (err) {
         console.log(err);
