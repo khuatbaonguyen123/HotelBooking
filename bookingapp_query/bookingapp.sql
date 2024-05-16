@@ -25,7 +25,8 @@ CREATE TABLE type (
 	capacity int,
 	description TEXT,
 	link VARCHAR(255),
-	image VARCHAR(255)
+	image VARCHAR(255),
+	FULLTEXT(description)
 );
 
 CREATE TABLE room (
