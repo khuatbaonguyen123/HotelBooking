@@ -14,13 +14,18 @@ const adminRouter = require('./routes/admin');
 const chatRouter = require('./routes/chatting');
 const rateRouter = require('./routes/rate');
 
-
+const {backupMongoDB, checkCollectionExists} = require('./backup_mongoDB');
 const { startDatabaseBackup } = require('./mysqldump');
 
 
 const app = express();
 
+backupMongoDB();
+checkCollectionExists();
+
+
 startDatabaseBackup();
+
 mongoose.connect(process.env.MONGOLOCAL_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
