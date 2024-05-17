@@ -1,8 +1,8 @@
 ### Technical Specifications
 * Frontend: EJS, CSS, Javascript
 * Backend: ExpressJS, NodeJS
-* Database: MySQL, MongoDB, Redis
-
+* Database: MySQL, MongoDB, Redis, Opensearch
+* Sync: Docker, Debezium, Kafka
 ### Features
 - Authentication: Login, signup, resetPassword, updatePassword
 - Authorization:
@@ -51,24 +51,5 @@
 5. Import the project in any IDE that support the aforementioned programming languages.
 6. Deploy & Run the application with `npm run dev` :D
 
-## Project Structure
-    ├── bookingapp_query    # tables and queries used for this project
-    |   └── bookingapp.jpg
-    |   └── bookingapp.sql
-    ├── pages               #ejs files
-    ├── public              
-    ├── routes              #code files
-    |   └── admin.js
-    |   └── booking.js
-    |   └── general.js
-    |   └── users.js    
-    ├── .env
-    ├── .gitignore
-    ├── README.md
-    ├── database.js
-    ├── HBWpresentSlide.pdf
-    ├── index.js
-    ├── package-lock.json
-    └── package.json
 
 ## Collaborators
