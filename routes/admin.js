@@ -248,6 +248,7 @@ router.get("/admin/test", isLoggedInAdmin, async (req, res) => {
 
 function getReservationData(searchby, keyword, limit, offset) {
   var OSquery;
+  console.log(keyword);
   return new Promise(async (resolve, reject) => {
     if (searchby == "default") {
       OSquery = {
@@ -620,7 +621,11 @@ router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
         });
       } else {
         let status = result[0].status;
-        if (status === "accept" || status === "checkin" || status === "pending") {
+        if (
+          status === "accept" ||
+          status === "checkin" ||
+          status === "pending"
+        ) {
           res.redirect("/admin/rooms");
         } else {
           db.query(`DELETE FROM room WHERE id = '${id}'`, (err, room) => {
@@ -636,7 +641,6 @@ router.post("/admin/deleteRoom/:id", isLoggedInAdmin, (req, res) => {
     }
   );
 });
-
 
 router.get("/admin/addRoomForm", (req, res) => {
   res.render("adminAddRoom.ejs");

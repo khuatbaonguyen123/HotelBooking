@@ -35,7 +35,7 @@ const run = async () => {
           // Parse the message value as JSON
           const messagePayload = JSON.parse(message.value.toString());
           const { payload } = messagePayload;
-
+          console.log("Payload:", payload);
           // Logging the operation type
           const op = payload.op;
           const userName = `${payload.after.first_name} ${payload.after.last_name}`;

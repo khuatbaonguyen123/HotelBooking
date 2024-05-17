@@ -58,23 +58,18 @@
         <table>
 			<thead>
 				<tr> <!-- display column name -->
-					<th>BookingId <span class="icon-arrow">&UpArrow;</span></th>
 					<th>Name <span class="icon-arrow">&UpArrow;</span></th>
 					<th>Date in <span class="icon-arrow">&UpArrow;</span></th>
 					<th>Date out <span class="icon-arrow">&UpArrow;</span></th>
 					<th>Description <span class="icon-arrow">&UpArrow;</span></th>
 					<th>Status <span class="icon-arrow">&UpArrow;</span></th>
 					<th>Price <span class="icon-arrow">&UpArrow;</span></th>
-					<th>Payment date <span class="icon-arrow">&UpArrow;</span></th>
 				</tr>
 			</thead>
             <tbody>
 
                 <% userReservation.forEach(element=>{ %>
                     <tr>
-                        <td data-label="Booker_id" style="font-size: 17px; color: aliceblue;">
-                            <%= element.bid %>
-                        </td>
                         <td data-label="Booker Name" style="font-size: 17px; color: aliceblue;">
                             <%= element.name %>
                         </td>
@@ -92,9 +87,6 @@
                         </td>
                         <td data-label="Price" style="font-size: 17px; color: aliceblue;">
                             <%= element.price %>
-                        </td>
-                        <td data-label="PaymentDate" style="font-size: 17px; color: aliceblue;">
-                            <%= element.payment_date %>
                         </td>
                     </tr>
                     <% }) %>

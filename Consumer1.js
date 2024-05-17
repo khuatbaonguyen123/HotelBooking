@@ -15,9 +15,9 @@ function dateFormatting(dateType) {
   let month = dateType.getMonth() + 1;
   let year = dateType.getFullYear();
   const dateFormat = [
-    year,
-    (month > 9 ? "" : "0") + month,
     (date > 9 ? "" : "0") + date,
+    (month > 9 ? "" : "0") + month,
+    year,
   ].join("/");
   return dateFormat;
 }
@@ -67,8 +67,8 @@ const run = async () => {
                 booker_id: element.booker_id,
                 name: element.name,
                 phone: element.phone,
-                date_in: dateFormatting(element.date_in),
-                date_out: dateFormatting(element.date_out),
+                date_in: `${dateFormatting(element.date_in)}`,
+                date_out: `${dateFormatting(element.date_out)}`,
                 description: [element.number], // Khởi tạo mảng chứa description
                 status: element.status,
                 price: element.total_price,
@@ -94,7 +94,7 @@ const run = async () => {
               description: userReservation[0].description,
               status: userReservation[0].status,
               price: userReservation[0].price,
-              payment_date: userReservation[0].payment_date
+              payment_date: userReservation[0].payment_date,
             };
             await clientES.index({
               index: "bookingapp",

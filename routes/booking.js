@@ -298,9 +298,9 @@ router.post("/booking", isLoggedIn, limitRequest, async (req, res) => {
 //   console.log(arrivalDate, departureDate);
 //   for (let i = 0; i < roomNumbers.length; i++) {
 //     let query = `select * from vReservation
-//             where number = ${roomNumbers[i]} and 
-//             (status != 'checkout' and status != 'decline') and 
-//             (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
+//             where number = ${roomNumbers[i]} and
+//             (status != 'checkout' and status != 'decline') and
+//             (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or
 //             ('${departureDate}' > date_in and '${departureDate}' <= date_out));`;
 //     console.log(query);
 //     db.query(query, (err, result) => {
@@ -316,46 +316,45 @@ router.post("/booking", isLoggedIn, limitRequest, async (req, res) => {
 
 //trang
 
-async function isAvailable (req, res, next){
-    const arrivalDate = req.body.arrivalDate;
-    const departureDate = req.body.departureDate;
-    const roomNumbers = Object.values(req.body.rooms);
-    let unavailableRooms = [];
+async function isAvailable(req, res, next) {
+  const arrivalDate = req.body.arrivalDate;
+  const departureDate = req.body.departureDate;
+  const roomNumbers = Object.values(req.body.rooms);
+  let unavailableRooms = [];
 
-    for (let i = 0; i < roomNumbers.length; i++) {
-        let query = `select * from vReservation
+  for (let i = 0; i < roomNumbers.length; i++) {
+    let query = `select * from vReservation
             where number = ${roomNumbers[i]} and 
             (status != 'checkout' and status != 'decline') and 
             (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or 
-            ('${departureDate}' > date_in and '${departureDate}' <= date_out));`
-            
-        let result = await new Promise((resolve, reject) => {
-            db.query(query, (err, results) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(results);
-                }
-            });
-        });
+            ('${departureDate}' > date_in and '${departureDate}' <= date_out));`;
 
-        if (result && result.length > 0) {
-            unavailableRooms.push(roomNumbers[i]);
+    let result = await new Promise((resolve, reject) => {
+      db.query(query, (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
         }
-    }
+      });
+    });
 
-    if (unavailableRooms.length > 0) {
-        req.flash('errors', [`Room(s) ${unavailableRooms.join(', ')} are not available`]);
-        res.redirect('/booking');
-    } else {
-        next();
+    if (result && result.length > 0) {
+      unavailableRooms.push(roomNumbers[i]);
     }
+  }
+
+  if (unavailableRooms.length > 0) {
+    req.flash("errors", [
+      `Room(s) ${unavailableRooms.join(", ")} are not available`,
+    ]);
+    res.redirect("/booking");
+  } else {
+    next();
+  }
 }
 
-
-
 //trang
-
 
 router.post("/roomSelect", isLoggedIn, isAvailable, async (req, res) => {
   try {

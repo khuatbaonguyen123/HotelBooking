@@ -67,10 +67,10 @@ router.post('/signup', async (req, res) => {
     const { fname, lname, email, password, phone, dob } = req.body;
     let hashedPassword = await bcrypt.hash(password, 10);
     let checkfName = await getCheckLink(fname);
-    console.log("fname:" + checkfName);
+    // console.log("fname:" + checkfName);
     if (checkfName === "Not Link" || checkfName === "Safe") {
         let checklName = await getCheckLink(lname);
-        console.log("lname:" + checklName);
+        // console.log("lname:" + checklName);
         if (checklName === "Not Link" || checklName === "Safe") {
             let checkPassword = await getCheckLink(password);
             console.log(checkPassword);
@@ -139,7 +139,7 @@ router.get('/init_redis', (req,res) =>{
             if (err) {
             console.error('Error incrementing score:', err);
             }
-            console.log(`myzset${result[0].cnt + 1}`);
+            // console.log(`myzset${result[0].cnt + 1}`);
         });
     });
     res.redirect('/loginform');
@@ -258,10 +258,10 @@ router.post('/editProfile',isLoggedIn, async(req,res)=>{
     const {id,fname,lname,email,phone,dob}=req.body;
     
     let checkfName = await getCheckLink(fname);
-    console.log("fname:" + checkfName);
+    // console.log("fname:" + checkfName);
     if (checkfName === "Not Link" || checkfName === "Safe") {
         let checklName = await getCheckLink(lname);
-        console.log("lname:" + checklName);
+        // console.log("lname:" + checklName);
         if (checklName === "Not Link" || checklName === "Safe") {
             db.query(`select * from booker where email='${email}' and id<>${id}`,(err,results)=>{
                 if (err) throw err;
