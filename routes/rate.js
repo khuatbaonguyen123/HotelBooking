@@ -114,31 +114,4 @@ router.get('/count/:id', async (req, res, next) => {
 });
 
 
-
-// const createRatings = async () => {
-//     const typeRoomValues = [1, 2, 3, 4, 5, 6];
-//     const ratingValues = [1, 2, 3, 4, 5];
-
-//     for (let i = 0; i < 5000000; i++) {
-//         const randomTypeRoomIndex = Math.floor(Math.random() * typeRoomValues.length);
-//         const randomRatingIndex = Math.floor(Math.random() * ratingValues.length);
-
-//         const newRating = new Rating({
-//             idUser: i, // Giả sử idUser tăng dần từ 0
-//             typeRoom: typeRoomValues[randomTypeRoomIndex],
-//             reservation: Math.floor(Math.random() * 1000), // Giả sử reservation là một số ngẫu nhiên từ 0 đến 999
-//             rating: ratingValues[randomRatingIndex],
-//             comment: faker.lorem.sentence(), // Tạo một câu ngẫu nhiên
-//             timestamp: faker.date.recent() // Tạo một thời gian ngẫu nhiên
-//         });
-
-//         await newRating.save();
-//     }
-
-//     console.log("Created 1 million ratings.");
-//     mongoose.disconnect();
-// }
-
-// createRatings();
-
 module.exports = router;

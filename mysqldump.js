@@ -61,38 +61,3 @@ module.exports = {
     startDatabaseBackup
 };
 
-// const backupFileName = '../HotelBooking/backup.sql';
-// // const dumpFileName = `${Math.round(Date.now() / 1000)}.dump.sql`
-
-// const absolutePath = path.resolve(__dirname, backupFileName); // Tạo đường dẫn tuyệt đối
-
-// // Kiểm tra sự tồn tại của file backup.sql
-// // if (!fs.existsSync(absolutePath)) {
-// //     // Nếu file không tồn tại, tạo file mới
-// //     fs.writeFileSync(absolutePath, '', 'utf-8'); // Tạo file trống
-// //     console.log(`Đã tạo file ${backupFileName}`);
-// // } else {
-// //     console.log(`File ${backupFileName} đã tồn tại`);
-// //     console.log('Absolute Path:', absolutePath);
-// // }
-
-
-// const dumpProcess = spawn('C:/Program Files/MySQL/MySQL Server 8.0/bin/mysqldump', [
-//     '-u', dbUsername,
-//     '-p' + dbPassword,
-//     '--host', dbHost,
-//     '--port', dbPort,
-//     dbName
-// ]);
-
-// const writeStream = fs.createWriteStream(backupFileName);
-
-// dumpProcess.stdout.pipe(writeStream);
-
-// dumpProcess.stdout.on('end', () => {
-//     console.log('Đã sao lưu thành công từ replica.');
-// });
-
-// dumpProcess.stderr.on('data', (data) => {
-//     console.error(`Lỗi khi sao lưu từ replica: ${data}`);
-// });

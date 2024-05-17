@@ -37,17 +37,6 @@ mongoose.connect(process.env.MONGOLOCAL_URL, {
     console.error('Error connecting to MongoDB:', error);
 });
 
-
-// const clientRedis = Redis.createClient(); //default localhost
-
-// clientRedis.on('connect', function(){
-//   console.log('Connected to Redis...');
-// });
-
-// clientRedis.on('error', (err) =>{
-//   console.log('Redis error: ', err);
-// });
-
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(session({
     secret: "thisismysecretkey",

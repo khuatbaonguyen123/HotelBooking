@@ -291,29 +291,6 @@ router.post("/booking", isLoggedIn, limitRequest, async (req, res) => {
   }
 });
 
-// async function isAvailable(req, res, next) {
-//   const arrivalDate = req.body.arrivalDate;
-//   const departureDate = req.body.departureDate;
-//   const roomNumbers = Object.values(req.body.rooms);
-//   console.log(arrivalDate, departureDate);
-//   for (let i = 0; i < roomNumbers.length; i++) {
-//     let query = `select * from vReservation
-//             where number = ${roomNumbers[i]} and
-//             (status != 'checkout' and status != 'decline') and
-//             (('${arrivalDate}' >= date_in and '${arrivalDate}' < date_out) or
-//             ('${departureDate}' > date_in and '${departureDate}' <= date_out));`;
-//     console.log(query);
-//     db.query(query, (err, result) => {
-//       console.log(err);
-//       console.log(result);
-//       if (result && result.length > 0) {
-//         res.json("Room is no available");
-//       }
-//     });
-//   }
-//   next();
-// }
-
 //trang
 
 async function isAvailable(req, res, next) {
