@@ -20,29 +20,29 @@ services:
     networks:
       - hotelbooking
 
-  mongo-0-b:
-    container_name: mongo-0-b
-    image: mongo
-    ports:
-      - 127.0.10.2:27017:27017
-    volumes:
-      - mongo-0-b:/data/db
-    restart: unless-stopped
-    command: "--wiredTigerCacheSizeGB 0.25 --replSet rs0"
-    networks:
-      - hotelbooking
+  # mongo-0-b:
+  #   container_name: mongo-0-b
+  #   image: mongo
+  #   ports:
+  #     - 127.0.10.2:27017:27017
+  #   volumes:
+  #     - mongo-0-b:/data/db
+  #   restart: unless-stopped
+  #   command: "--wiredTigerCacheSizeGB 0.25 --replSet rs0"
+  #   networks:
+  #     - hotelbooking
 
-  mongo-0-c:
-    container_name: mongo-0-c
-    image: mongo
-    ports:
-      - 127.0.10.3:27017:27017
-    volumes:
-      - mongo-0-c:/data/db
-    restart: unless-stopped
-    command: "--wiredTigerCacheSizeGB 0.25 --replSet rs0"
-    networks:
-      - hotelbooking
+  # mongo-0-c:
+  #   container_name: mongo-0-c
+  #   image: mongo
+  #   ports:
+  #     - 127.0.10.3:27017:27017
+  #   volumes:
+  #     - mongo-0-c:/data/db
+  #   restart: unless-stopped
+  #   command: "--wiredTigerCacheSizeGB 0.25 --replSet rs0"
+  #   networks:
+  #     - hotelbooking
   
   mysql:
     container_name: mysql8

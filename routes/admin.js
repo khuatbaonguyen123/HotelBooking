@@ -83,7 +83,9 @@ router.get("/admin/dashboard", isLoggedInAdmin, async (req, res) => {
       // Lấy dữ liệu từ CSDL với giới hạn số lượng mục và vị trí bắt đầu
       response1 = await new Promise((resolve, reject) => {
         db.query(
-          `SELECT * FROM vDashboard LIMIT ${limit} OFFSET ${offset}`,
+          `SELECT * FROM vDashboard
+          order by id desc
+          LIMIT ${limit} OFFSET ${offset}`,
           (err, results) => {
             if (err) reject(new Error(err.message));
             resolve(results);
@@ -445,12 +447,12 @@ router.post("/admin/checkin/:id", isLoggedInAdmin, async (req, res) => {
           (err, result) => {
             if (err) throw err;
             else {
-              res.redirect("/admin/reservation");
+              res.redirect("/admin/dashboard");
             }
           }
         );
       } else {
-        res.redirect("/admin/reservation");
+        res.redirect("/admin/dashboard");
       }
     }
   });
