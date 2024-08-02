@@ -49,12 +49,8 @@ jobs:
             echo "Test passed"
           fi
 
-      - name: Generate JMeter HTML Report
-        run: |
-          jmeter -g result.jtl -o html-report
-
-      - name: Upload JMeter HTML Report
+      - name: Upload JMeter Results
         uses: actions/upload-artifact@v2
         with:
-          name: jmeter-html-report
-          path: html-report
+          name: jmeter-results
+          path: result.jtl
