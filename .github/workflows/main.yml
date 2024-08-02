@@ -48,3 +48,9 @@ jobs:
           else
             echo "Test passed"
           fi
+
+      - name: Upload JMeter Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: jmeter-results
+          path: result.jtl
