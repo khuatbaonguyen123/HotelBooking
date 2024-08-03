@@ -1,15 +1,56 @@
-name: JMeter Test
+name: Run JMeter Test
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  run-jmeter:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Run JMeter Tests
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          java-package: 'jdk'
+          architecture: 'x64'
+          check-latest: false
+
+      - name: Install JMeter
         run: |
-          java --add-opens java.base/java.lang=ALL-UNNAMED -jar ApacheJMeter.jar -jjmeter.save.saveservice.output_format=xml -n -t ./signin.jmx -l report.jtl
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.3.tgz
+          tar -xvzf apache-jmeter-5.4.3.tgz
+          export JMETER_HOME=$PWD/apache-jmeter-5.4.3
+          export PATH=$JMETER_HOME/bin:$PATH
+          echo "JMETER_HOME=$JMETER_HOME" >> $GITHUB_ENV
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
+      - name: Run JMeter Test
+        env:
+          JMETER_HOME: ${{ env.JMETER_HOME }}
+          PATH: ${{ env.PATH }}
+        run: |
+          jmeter -n -t signin.jmx -l result.jtl
+          if grep -q 's="false"' result.jtl; then
+            echo "Test failed"
+            exit 1
+          else
+            echo "Test passed"
+          fi
+
+      - name: Upload JMeter Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: jmeter-results
+          path: result.jtl
